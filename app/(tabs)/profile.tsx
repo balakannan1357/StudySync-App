@@ -1,61 +1,124 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, Image } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, Image, StyleSheet, ImageBackground } from 'react-native';
 
-export default function ProfilePage() {
+const ProfileScreen = () => {
   const user = {
-    name: 'Sriram ',
+    name: 'Sriram',
+    dob: '25/11/2001',
+    phone: '+91 9876543210',
     email: 'sri@sri.com',
-    location: ' chennai |',
-    
+    location: 'Chennai, India',
+    school: 'ABC School of Excellence',
   };
 
   return (
-    <View style={styles.container}>
-      {/* Profile Image */}
+    <ImageBackground
+      source={require('../../assets/images/bg.jpg')} // ✅ Background Image
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        {/* Profile Picture with Inner Border */}
+        <View style={styles.avatarBorder}>
+          <Image
+            source={require('../../assets/images/sriramPhoto.png')} // ✅ Local Image
+            style={styles.avatar}
+          />
+        </View>
 
-      {/* User Information */}
-      <Text style={styles.name}>{user.name}</Text>
-      <Text style={styles.email}>{user.email}</Text>
-      <Text style={styles.bio}>{user.location}</Text>
+        {/* User Info */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>Name:</Text>
+          <View style={styles.valueBox}>
+            <Text style={styles.infoValue}>{user.name}</Text>
+          </View>
+        </View>
 
-      {/* Button to Navigate Back to Home */}
-      <Link href="/" asChild>
-        <Button title="Go Back to Home" />
-      </Link>
-    </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>DOB:</Text>
+          <View style={styles.valueBox}>
+            <Text style={styles.infoValue}>{user.dob}</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>Phone:</Text>
+          <View style={styles.valueBox}>
+            <Text style={styles.infoValue}>{user.phone}</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>Email:</Text>
+          <View style={styles.valueBox}>
+            <Text style={styles.infoValue}>{user.email}</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>Location:</Text>
+          <View style={styles.valueBox}>
+            <Text style={styles.infoValue}>{user.location}</Text>
+          </View>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoLabel}>School:</Text>
+          <View style={styles.valueBox}>
+            <Text style={styles.infoValue}>{user.school}</Text>
+          </View>
+        </View>
+      </View>
+    </ImageBackground>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white overlay
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  avatarBorder: {
+    backgroundColor: '#ccc', // Gray background for the inner border
+    padding: 5, // Inner border thickness
+    borderRadius: 85, // Half of width/height to make it circular
   },
   avatar: {
     width: 150,
     height: 150,
     borderRadius: 75,
-    marginBottom: 20,
+    borderWidth: 3,
+    borderColor: '#007AFF',
   },
-  name: {
-    fontSize: 24,
+  infoContainer: {
+    flexDirection: 'row', // Align label and value horizontally
+    alignItems: 'center', // Center vertically
+    marginTop: 15,
+    width: '90%',
+  },
+  infoLabel: {
     fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: 16,
+    color: '#555',
+    marginRight: 10, // Space between label and value box
+  },
+  valueBox: {
+    backgroundColor: '#ccc', // Gray background for the value box
+    padding: 10,
+    borderRadius: 5,
+    flex: 1, // Take up remaining space
+  },
+  infoValue: {
+    fontSize: 14,
     color: '#333',
   },
-  email: {
-    fontSize: 16,
-    marginBottom: 10,
-    color: '#666',
-  },
-  bio: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#888',
-  },
 });
+
+export default ProfileScreen;
