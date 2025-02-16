@@ -18,13 +18,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FontAwesome name="user" size={24} color={color} />,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="tasks"
         options={{
-          title: 'Tasks',
+          title: 'bals',
           tabBarIcon: ({ color }) => <FontAwesome name="tasks" size={24} color={color} />,
         }}
-      />
+      /> */}
     </Tabs>
   );
 }
