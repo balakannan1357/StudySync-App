@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, ScrollView, Modal, TouchableOpacity } from 'react-native';
+import CalendarStrip from 'react-native-calendar-strip';
+import { Link } from 'expo-router'; // Import Link for navigation
 
 // Mock data (replace with actual API call)
 const mockSubtopics = [
@@ -7,8 +9,9 @@ const mockSubtopics = [
     subtopic_id: '1',
     subtopic_name: 'Motion in a Straight Line',
     subject: 'Physics',
-    starttime: '09:30', // Start time in HH:MM format
-    endtime: '10:30', // End time in HH:MM format
+    starttime: '09:30',
+    endtime: '10:30',
+    date: '2025-02-28', // Add date in YYYY-MM-DD format
   },
   {
     subtopic_id: '2',
@@ -16,6 +19,7 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '10:30',
     endtime: '11:00',
+    date: '2025-02-28',
   },
   {
     subtopic_id: '3',
@@ -23,6 +27,7 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '16:30',
     endtime: '17:00',
+    date: '2025-03-01',
   },
 ];
 
@@ -30,14 +35,12 @@ const MainPage = () => {
   const [subtopics, setSubtopics] = useState(mockSubtopics);
   const [selectedSubtopic, setSelectedSubtopic] = useState(null); // Track selected subtopic
   const [modalVisible, setModalVisible] = useState(false); // Control modal visibility
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Track selected date
 
-  // TODO: Implement API call for scheduling data
-  useEffect(() => {
-    // Future implementation:
-    // fetchScheduleData().then(data => {
-    //   setSubtopics(data);
-    // });
-  }, []);
+  // Filter subtopics based on the selected date
+  const filteredSubtopics = subtopics.filter(
+    (subtopic) => subtopic.date === selectedDate
+  );
 
   // Handle subtopic click
   const handleSubtopicClick = (subtopic) => {
@@ -51,14 +54,36 @@ const MainPage = () => {
     setSelectedSubtopic(null);
   };
 
+  // Handle date selection from the calendar
+  const handleDateSelected = (date) => {
+    setSelectedDate(date.toISOString().split('T')[0]);
+  };
+
   return (
     <ImageBackground
       source={require('../../assets/images/bg.jpg')}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
+      {/* Calendar Strip */}
+      <CalendarStrip
+        selectedDate={new Date(selectedDate)}
+        onDateSelected={handleDateSelected}
+        style={styles.calendar}
+        calendarColor={'#fff'}
+        calendarHeaderStyle={{ color: '#333' }}
+        dateNumberStyle={{ color: '#333' }}
+        dateNameStyle={{ color: '#333' }}
+        highlightDateNumberStyle={{ color: '#fff' }}
+        highlightDateNameStyle={{ color: '#fff' }}
+        disabledDateNameStyle={{ color: '#ccc' }}
+        disabledDateNumberStyle={{ color: '#ccc' }}
+        iconContainer={{ flex: 0.1 }}
+      />
+
+      {/* Subtopic List */}
       <ScrollView style={styles.overlay}>
-        {subtopics.map((subtopic) => (
+        {filteredSubtopics.map((subtopic) => (
           <TouchableOpacity
             key={subtopic.subtopic_id}
             onPress={() => handleSubtopicClick(subtopic)}
@@ -67,6 +92,13 @@ const MainPage = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Floating Button to Add Subtopic */}
+      <Link href="/addTaskPage" asChild>
+        <TouchableOpacity style={styles.addButton}>
+          <Text style={styles.addButtonText}>+</Text>
+        </TouchableOpacity>
+      </Link>
 
       {/* Modal for displaying subtopic details */}
       <Modal
@@ -111,6 +143,14 @@ const styles = StyleSheet.create({
     flex: 1, // Takes up the entire screen
     width: '100%', // Full width
     height: '100%', // Full height
+  },
+
+  // Calendar style
+  calendar: {
+    height: 100,
+    paddingTop: 10,
+    paddingBottom: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white background
   },
 
   // Overlay for the ScrollView to make content readable
@@ -203,6 +243,24 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 16,
     color: '#333',
+  },
+
+  // Floating Add Button
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#007BFF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  },
+  addButtonText: {
+    fontSize: 24,
+    color: '#fff',
   },
 });
 
