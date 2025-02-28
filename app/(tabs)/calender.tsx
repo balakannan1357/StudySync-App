@@ -1,24 +1,12 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+// app/calendar.tsx
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
-import { useNavigation } from '@react-navigation/native';
 
-const CalendarPage = () => {
-  const navigation = useNavigation();
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // Handle date selection
-  const handleDateSelected = (date) => {
-    setSelectedDate(date);
-    // Navigate to the task page with the selected date
-    navigation.navigate('TaskPage', { selectedDate: date.toISOString().split('T')[0] });
-  };
-
+const CalendarScreen = () => {
   return (
     <View style={styles.container}>
       <CalendarStrip
-        selectedDate={selectedDate}
-        onDateSelected={handleDateSelected}
         style={styles.calendar}
         calendarColor={'#fff'}
         calendarHeaderStyle={{ color: '#333' }}
@@ -30,6 +18,7 @@ const CalendarPage = () => {
         disabledDateNumberStyle={{ color: '#ccc' }}
         iconContainer={{ flex: 0.1 }}
       />
+      <Text style={styles.text}>Select a date to view tasks</Text>
     </View>
   );
 };
@@ -45,6 +34,12 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 10,
   },
+  text: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
 });
 
-export default CalendarPage;
+export default CalendarScreen;
