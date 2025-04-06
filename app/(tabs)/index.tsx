@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, ScrollView, Modal, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, Dimensions } from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
-import { Link } from 'expo-router'; // Import Link for navigation
+import { Link } from 'expo-router';
+import {LinearGradient} from 'expo-linear-gradient';
 
-// Mock data (replace with actual API call)
+// Mock data
 const mockSubtopics = [
   {
     subtopic_id: '1',
@@ -11,7 +12,7 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '09:30',
     endtime: '10:30',
-    date: '2025-02-28', // Add date in YYYY-MM-DD format
+    date: '2025-02-28',
   },
   {
     subtopic_id: '2',
@@ -31,66 +32,72 @@ const mockSubtopics = [
   },
 ];
 
-const MainPage = () => {
-  const [subtopics, setSubtopics] = useState(mockSubtopics);
-  const [selectedSubtopic, setSelectedSubtopic] = useState(null); // Track selected subtopic
-  const [modalVisible, setModalVisible] = useState(false); // Control modal visibility
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Track selected date
 
-  // Filter subtopics based on the selected date
+const MainPage = () => {
+  const [subtopics] = useState(mockSubtopics);
+  const [selectedSubtopic, setSelectedSubtopic] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
   const filteredSubtopics = subtopics.filter(
     (subtopic) => subtopic.date === selectedDate
   );
 
-  // Handle subtopic click
   const handleSubtopicClick = (subtopic) => {
-    setSelectedSubtopic(subtopic); // Set the selected subtopic
-    setModalVisible(true); // Show the modal
+    setSelectedSubtopic(subtopic);
+    setModalVisible(true);
   };
 
-  // Close the modal
   const closeModal = () => {
     setModalVisible(false);
     setSelectedSubtopic(null);
   };
 
-  // Handle date selection from the calendar
   const handleDateSelected = (date) => {
     setSelectedDate(date.toISOString().split('T')[0]);
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/bg.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
+    <LinearGradient
+      colors={['#0077be', '#00a8e8']} // Sea blue gradient from darker to lighter
+      style={styles.gradientContainer}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
     >
       {/* Calendar Strip */}
-      <CalendarStrip
-        selectedDate={new Date(selectedDate)}
-        onDateSelected={handleDateSelected}
-        style={styles.calendar}
-        calendarColor={'#fff'}
-        calendarHeaderStyle={{ color: '#333' }}
-        dateNumberStyle={{ color: '#333' }}
-        dateNameStyle={{ color: '#333' }}
-        highlightDateNumberStyle={{ color: '#fff' }}
-        highlightDateNameStyle={{ color: '#fff' }}
-        disabledDateNameStyle={{ color: '#ccc' }}
-        disabledDateNumberStyle={{ color: '#ccc' }}
-        iconContainer={{ flex: 0.1 }}
-      />
+      <View style={styles.calendarContainer}>
+        <CalendarStrip
+          selectedDate={new Date(selectedDate)}
+          onDateSelected={handleDateSelected}
+          style={styles.calendar}
+          calendarColor={'rgba(255, 255, 255, 0.9)'}
+          calendarHeaderStyle={{ color: '#333' }}
+          dateNumberStyle={{ color: '#333' }}
+          dateNameStyle={{ color: '#333' }}
+          highlightDateNumberStyle={{ color: '#4444EC' }} //color highlight for selected date and day's name
+          highlightDateNameStyle={{ color: '#4444EC' }}
+          disabledDateNameStyle={{ color: '#ccc' }}
+          disabledDateNumberStyle={{ color: '#ccc' }}
+          iconContainer={{ flex: 0.1 }}
+        />
+      </View>
 
       {/* Subtopic List */}
-      <ScrollView style={styles.overlay}>
-        {filteredSubtopics.map((subtopic) => (
-          <TouchableOpacity
-            key={subtopic.subtopic_id}
-            onPress={() => handleSubtopicClick(subtopic)}
-          >
-            <SubtopicCard subtopic={subtopic} />
-          </TouchableOpacity>
-        ))}
+      <ScrollView style={styles.contentContainer}>
+        {filteredSubtopics.length > 0 ? (
+          filteredSubtopics.map((subtopic) => (
+            <TouchableOpacity
+              key={subtopic.subtopic_id}
+              onPress={() => handleSubtopicClick(subtopic)}
+            >
+              <SubtopicCard subtopic={subtopic} />
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No tasks for this day</Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Floating Button to Add Subtopic */}
@@ -123,7 +130,7 @@ const MainPage = () => {
           </View>
         </View>
       </Modal>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
@@ -132,135 +139,119 @@ const SubtopicCard = ({ subtopic }) => (
     <Text style={styles.subtopicName}>{subtopic.subtopic_name}</Text>
     <Text style={styles.subtopicSubject}>{subtopic.subject}</Text>
     <Text style={styles.subtopicTime}>
-      Start Time: {subtopic.starttime} | End Time: {subtopic.endtime}
+      {subtopic.starttime} - {subtopic.endtime}
     </Text>
   </View>
 );
-
 const styles = StyleSheet.create({
-  // Background image style
-  backgroundImage: {
-    flex: 1, // Takes up the entire screen
-    width: '100%', // Full width
-    height: '100%', // Full height
+  gradientContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
-
-  // Calendar style
+  calendarContainer: {
+    paddingTop: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
   calendar: {
     height: 100,
-    paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent white background
   },
-
-  // Overlay for the ScrollView to make content readable
-  overlay: {
-    flex: 1, // Takes up the entire screen
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white overlay
-    padding: 20, // Padding around the content
+  contentContainer: {
+    flex: 1,
+    padding: 20,
   },
-
-  // Container for each subtopic card
-  subtopicContainer: {
-    backgroundColor: '#fff', // White background for the card
-    borderRadius: 10, // Rounded corners
-    padding: 15, // Padding inside the card
-    marginBottom: 15, // Space between cards
-    elevation: 3, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 2 }, // Shadow position
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 4, // Shadow blur radius
-  },
-
-  // Style for the subtopic name
+  // In your styles
+subtopicContainer: {
+  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 15,
+  boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+  // For Android
+  elevation: 3,
+  // Remove boxShadow - it's not supported in React Native
+},
   subtopicName: {
-    fontSize: 18, // Font size
-    fontWeight: 'bold', // Bold text
-    color: '#333', // Dark gray color
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
   },
-
-  // Style for the subtopic subject
   subtopicSubject: {
-    fontSize: 14, // Font size
-    color: '#555', // Medium gray color
-    marginTop: 5, // Space above the text
+    fontSize: 14,
+    color: '#555',
+    marginTop: 5,
   },
-
-  // Style for the subtopic time
   subtopicTime: {
-    fontSize: 14, // Font size
-    color: '#777', // Light gray color
-    marginTop: 5, // Space above the text
+    fontSize: 14,
+    color: '#0077be',
+    marginTop: 5,
+    fontWeight: '500',
   },
-
-  // Modal container (background)
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-
-  // Modal content
   modalContent: {
-    backgroundColor: '#fff', // White background
-    borderRadius: 10, // Rounded corners
-    padding: 20, // Padding inside the modal
-    width: '80%', // Width of the modal
-    elevation: 5, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    elevation: 5,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
   },
-
-  // Modal title
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    color: '#0077be',
+    marginBottom: 12,
   },
-
-  // Modal text
   modalText: {
     fontSize: 16,
     color: '#555',
     marginBottom: 8,
   },
-
-  // Close button
   closeButton: {
     marginTop: 20,
-    backgroundColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#0077be',
+    borderRadius: 8,
+    padding: 12,
     alignItems: 'center',
   },
-
-  // Close button text
   closeButtonText: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
+    fontWeight: 'bold',
   },
-
-  // Floating Add Button
   addButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#007BFF',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#fff',
     width: 60,
     height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
   },
   addButtonText: {
-    fontSize: 24,
-    color: '#fff',
+    fontSize: 28,
+    color: '#0077be',
+    fontWeight: 'bold',
   },
 });
 

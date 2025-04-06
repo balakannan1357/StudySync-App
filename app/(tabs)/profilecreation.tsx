@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ImageBackground, TextInput, TouchableOpacity, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
-
+import {LinearGradient} from 'expo-linear-gradient';
 const ProfileCreationScreen = ({ navigation }) => {
   // State to store user input
   const [name, setName] = useState('');
@@ -101,11 +101,12 @@ const ProfileCreationScreen = ({ navigation }) => {
   
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/bg.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <LinearGradient
+              colors={['#0077be', '#00a8e8']} // Sea blue gradient from darker to lighter
+              style={styles.gradientContainer}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+            >
       <View style={styles.overlay}>
         {/* Profile Picture Placeholder */}
         <TouchableOpacity onPress={handleUploadProfilePic}>
@@ -212,11 +213,16 @@ const ProfileCreationScreen = ({ navigation }) => {
           <Text style={styles.saveButtonText}>Save Profile</Text>
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+     </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   backgroundImage: {
     flex: 1,
     width: '100%',

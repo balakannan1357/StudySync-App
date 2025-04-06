@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, ImageBackground } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-
+import {LinearGradient} from 'expo-linear-gradient';
 // Mock data structure
 const mockData = {
   Chemistry: {
@@ -75,11 +75,12 @@ const addTaskPage = () => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/bg.jpg')} // Add your background image path
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <LinearGradient
+                  colors={['#0077be', '#00a8e8']} // Sea blue gradient from darker to lighter
+                  style={styles.gradientContainer}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                >
       <ScrollView style={styles.overlay}>
         <Text style={styles.heading}>Add Subtopic</Text>
 
@@ -176,11 +177,17 @@ const addTaskPage = () => {
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
       </ScrollView>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+
+  gradientContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   backgroundImage: {
     flex: 1,
     width: '100%',
@@ -217,10 +224,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#fff',
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
   },
   picker: {
     width: '100%',
