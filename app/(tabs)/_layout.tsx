@@ -7,7 +7,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index" // This corresponds to the file `index.tsx` in the `tabs/` folder
         options={{
-          title: 'Home', // This is the custom title displayed in the tab
+          title: 'TaskApp', // This is the custom title displayed in the tab
           tabBarIcon: ({ color }) => <FontAwesome name="home" size={24} color={color} />,
         }}
       />

@@ -12,7 +12,7 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '09:30',
     endtime: '10:30',
-    date: '2025-02-28',
+    date: '2025-04-06',
   },
   {
     subtopic_id: '2',
@@ -20,7 +20,7 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '10:30',
     endtime: '11:00',
-    date: '2025-02-28',
+    date: '2025-04-06',
   },
   {
     subtopic_id: '3',
@@ -74,8 +74,8 @@ const MainPage = () => {
           calendarHeaderStyle={{ color: '#333' }}
           dateNumberStyle={{ color: '#333' }}
           dateNameStyle={{ color: '#333' }}
-          highlightDateNumberStyle={{ color: '#4444EC' }} //color highlight for selected date and day's name
-          highlightDateNameStyle={{ color: '#4444EC' }}
+          highlightDateNumberStyle={{ color: '#02B5EB' }} //color highlight for selected date and day's name
+          highlightDateNameStyle={{ color: '#02B5EB' }}
           disabledDateNameStyle={{ color: '#ccc' }}
           disabledDateNumberStyle={{ color: '#ccc' }}
           iconContainer={{ flex: 0.1 }}
@@ -240,8 +240,8 @@ subtopicContainer: {
     bottom: 30,
     right: 30,
     backgroundColor: '#fff',
-    width: 60,
-    height: 60,
+    width: 40,
+    height: 40,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
@@ -249,7 +249,7 @@ subtopicContainer: {
     boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
   },
   addButtonText: {
-    fontSize: 28,
+    fontSize: 20,
     color: '#0077be',
     fontWeight: 'bold',
   },

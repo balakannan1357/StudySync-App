@@ -102,7 +102,7 @@ const ProfileCreationScreen = ({ navigation }) => {
 
   return (
     <LinearGradient
-              colors={['#0077be', '#00a8e8']} // Sea blue gradient from darker to lighter
+    colors={['#0077be', '#00a8e8']}  // Sea blue gradient from darker to lighter
               style={styles.gradientContainer}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
