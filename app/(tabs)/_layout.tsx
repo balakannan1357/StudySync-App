@@ -5,26 +5,26 @@ export default function TabLayout() {
   return (
     <Tabs>
       <Tabs.Screen
-        name="index"
+        name="index" // This corresponds to the file `index.tsx` in the `tabs/` folder
         options={{
-          title: 'Home',
+          title: 'TaskApp', // This is the custom title displayed in the tab
           tabBarIcon: ({ color }) => <FontAwesome name="home" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="profile" // This corresponds to the file `profile.tsx` in the `tabs/` folder
         options={{
-          title: 'Profile',
+          title: 'Profile', // This is the custom title displayed in the tab
           tabBarIcon: ({ color }) => <FontAwesome name="user" size={24} color={color} />,
         }}
       />
-      {/* <Tabs.Screen
-        name="tasks"
+      <Tabs.Screen
+        name="profilecreation" // This corresponds to the file `profile.tsx` in the `tabs/` folder
         options={{
-          title: 'bals',
-          tabBarIcon: ({ color }) => <FontAwesome name="tasks" size={24} color={color} />,
+          title: 'Profile Creation', // This is the custom title displayed in the tab
+          tabBarIcon: ({ color }) => <FontAwesome name="user" size={24} color={color} />,
         }}
-      /> */}
+      />
     </Tabs>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ImageBackground } from 'react-native';
+import {LinearGradient} from 'expo-linear-gradient';
 
 const ProfileScreen = () => {
   const user = {
@@ -12,11 +13,12 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/bg.jpg')} // ✅ Background Image
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <LinearGradient
+          colors={['#0077be', '#00a8e8']} // Sea blue gradient from darker to lighter
+          style={styles.gradientContainer}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+        >
       <View style={styles.overlay}>
         {/* Profile Picture with Inner Border */}
         <View style={styles.avatarBorder}>
@@ -69,11 +71,17 @@ const ProfileScreen = () => {
           </View>
         </View>
       </View>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+
+  gradientContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   backgroundImage: {
     flex: 1,
     width: '100%',
