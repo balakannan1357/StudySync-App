@@ -338,11 +338,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    elevation: 5, // Note: elevation is Android-only, you might want to keep it if supporting Android
   },
   sectionTitle: {
     fontSize: 20,
@@ -389,11 +386,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: '#0077be',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    boxShadow: '0 2px 4px rgba(0, 119, 190, 0.3)', // Replaces shadow props
+    elevation: 3, // (Keep if needed for Android)
   },
   addButtonText: {
     color: '#fff',
@@ -405,11 +399,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 15,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Replaces shadow props
+    // elevation: 5, // (Android-only, remove for web)
   },
   taskListHeader: {
     flexDirection: 'row',

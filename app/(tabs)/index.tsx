@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity } from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
 import { Link } from 'expo-router';
-import {LinearGradient} from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 
-// Mock data
-const mockSubtopics = [
+interface Subtopic {
+  subtopic_id: string;
+  subtopic_name: string;
+  subject: string;
+  starttime: string;
+  endtime: string;
+  date: string;
+  completed: boolean;
+}
+
+const mockSubtopics: Subtopic[] = [
   {
     subtopic_id: '1',
     subtopic_name: 'Motion in a Straight Line',
     subject: 'Physics',
     starttime: '09:30',
     endtime: '10:30',
-    date: '2025-04-06',
+    date: '2025-04-28',
+    completed: false,
   },
   {
     subtopic_id: '2',
@@ -20,7 +30,8 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '10:30',
     endtime: '11:00',
-    date: '2025-04-06',
+    date: '2025-04-28',
+    completed: false,
   },
   {
     subtopic_id: '3',
@@ -28,38 +39,109 @@ const mockSubtopics = [
     subject: 'Physics',
     starttime: '16:30',
     endtime: '17:00',
-    date: '2025-03-01',
+    date: '2025-04-29',
+    completed: false,
   },
 ];
 
-
-const MainPage = () => {
-  const [subtopics] = useState(mockSubtopics);
-  const [selectedSubtopic, setSelectedSubtopic] = useState(null);
+const MainPage: React.FC = () => {
+  const [subtopics, setSubtopics] = useState<Subtopic[]>(mockSubtopics);
+  const [selectedSubtopic, setSelectedSubtopic] = useState<Subtopic | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timeSpent, setTimeSpent] = useState<number>(0);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [showActionModal, setShowActionModal] = useState(false);
 
   const filteredSubtopics = subtopics.filter(
-    (subtopic) => subtopic.date === selectedDate
+    (subtopic) => subtopic.date === selectedDate && !subtopic.completed
   );
 
-  const handleSubtopicClick = (subtopic) => {
+  const handleSubtopicClick = (subtopic: Subtopic) => {
     setSelectedSubtopic(subtopic);
-    setModalVisible(true);
+    setShowActionModal(true);
   };
 
   const closeModal = () => {
     setModalVisible(false);
+    setShowActionModal(false);
     setSelectedSubtopic(null);
+    stopTimer();
   };
 
-  const handleDateSelected = (date) => {
+  const handleDateSelected = (date: Date) => {
     setSelectedDate(date.toISOString().split('T')[0]);
   };
 
+  const startTimer = () => {
+    setTimerRunning(true);
+    setTimeSpent(0);
+    const interval = setInterval(() => {
+      setTimeSpent(prev => prev + 1);
+    }, 1000);
+    setTimerInterval(interval);
+    setShowActionModal(false);
+    setModalVisible(true);
+  };
+
+  const stopTimer = () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+    setTimerRunning(false);
+  };
+
+  const completeTask = () => {
+    stopTimer();
+    if (selectedSubtopic) {
+      const updatedSubtopics = subtopics.map(subtopic => {
+        if (subtopic.subtopic_id === selectedSubtopic.subtopic_id) {
+          return { ...subtopic, completed: true };
+        }
+        return subtopic;
+      });
+      setSubtopics(updatedSubtopics);
+    }
+    closeModal();
+  };
+
+  const postponeTask = () => {
+    if (selectedSubtopic) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDate = tomorrow.toISOString().split('T')[0];
+      
+      const updatedSubtopics = subtopics.map(subtopic => {
+        if (subtopic.subtopic_id === selectedSubtopic.subtopic_id) {
+          return { ...subtopic, date: tomorrowDate };
+        }
+        return subtopic;
+      });
+      
+      setSubtopics(updatedSubtopics);
+    }
+    closeModal();
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+    };
+  }, [timerInterval]);
+
   return (
     <LinearGradient
-      colors={['#0077be', '#00a8e8']} // Sea blue gradient from darker to lighter
+      colors={['#0077be', '#00a8e8']}
       style={styles.gradientContainer}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
@@ -74,7 +156,7 @@ const MainPage = () => {
           calendarHeaderStyle={{ color: '#333' }}
           dateNumberStyle={{ color: '#333' }}
           dateNameStyle={{ color: '#333' }}
-          highlightDateNumberStyle={{ color: '#02B5EB' }} //color highlight for selected date and day's name
+          highlightDateNumberStyle={{ color: '#02B5EB' }}
           highlightDateNameStyle={{ color: '#02B5EB' }}
           disabledDateNameStyle={{ color: '#ccc' }}
           disabledDateNumberStyle={{ color: '#ccc' }}
@@ -107,7 +189,34 @@ const MainPage = () => {
         </TouchableOpacity>
       </Link>
 
-      {/* Modal for displaying subtopic details */}
+      {/* Action Modal (Start Now or Postpone) */}
+      <Modal
+        visible={showActionModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedSubtopic?.subtopic_name}</Text>
+            <Text style={styles.modalText}>What would you like to do?</Text>
+            
+            <TouchableOpacity style={styles.actionButton} onPress={startTimer}>
+              <Text style={styles.actionButtonText}>Start Now</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.actionButton} onPress={postponeTask}>
+              <Text style={styles.actionButtonText}>AD Hoc</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+              <Text style={styles.closeButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Timer Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -120,10 +229,22 @@ const MainPage = () => {
               <>
                 <Text style={styles.modalTitle}>{selectedSubtopic.subtopic_name}</Text>
                 <Text style={styles.modalText}>Subject: {selectedSubtopic.subject}</Text>
-                <Text style={styles.modalText}>Start Time: {selectedSubtopic.starttime}</Text>
-                <Text style={styles.modalText}>End Time: {selectedSubtopic.endtime}</Text>
+                <Text style={styles.modalText}>Planned Time: {selectedSubtopic.starttime} - {selectedSubtopic.endtime}</Text>
+                
+                {timerRunning && (
+                  <View style={styles.timerContainer}>
+                    <Text style={styles.timerText}>Time Spent: {formatTime(timeSpent)}</Text>
+                  </View>
+                )}
               </>
             )}
+            
+            {timerRunning ? (
+              <TouchableOpacity style={styles.completeButton} onPress={completeTask}>
+                <Text style={styles.completeButtonText}>Mark as Completed</Text>
+              </TouchableOpacity>
+            ) : null}
+            
             <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
@@ -134,15 +255,24 @@ const MainPage = () => {
   );
 };
 
-const SubtopicCard = ({ subtopic }) => (
+interface SubtopicCardProps {
+  subtopic: Subtopic;
+}
+
+const SubtopicCard: React.FC<SubtopicCardProps> = ({ subtopic }) => (
   <View style={styles.subtopicContainer}>
     <Text style={styles.subtopicName}>{subtopic.subtopic_name}</Text>
     <Text style={styles.subtopicSubject}>{subtopic.subject}</Text>
     <Text style={styles.subtopicTime}>
       {subtopic.starttime} - {subtopic.endtime}
     </Text>
+    {subtopic.completed && (
+      <Text style={styles.completedText}>Completed</Text>
+    )}
   </View>
 );
+
+// Styles remain the same as in the previous example
 const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
@@ -161,17 +291,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  // In your styles
-subtopicContainer: {
-  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-  borderRadius: 12,
-  padding: 16,
-  marginBottom: 15,
-  boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
-  // For Android
-  elevation: 3,
-  // Remove boxShadow - it's not supported in React Native
-},
+  subtopicContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 15,
+    elevation: 3,
+  },
   subtopicName: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -187,6 +313,12 @@ subtopicContainer: {
     color: '#0077be',
     marginTop: 5,
     fontWeight: '500',
+  },
+  completedText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    marginTop: 5,
+    fontWeight: 'bold',
   },
   emptyState: {
     flex: 1,
@@ -210,7 +342,6 @@ subtopicContainer: {
     padding: 24,
     width: '80%',
     elevation: 5,
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
   },
   modalTitle: {
     fontSize: 20,
@@ -223,9 +354,42 @@ subtopicContainer: {
     color: '#555',
     marginBottom: 8,
   },
-  closeButton: {
-    marginTop: 20,
+  timerContainer: {
+    marginVertical: 15,
+    alignItems: 'center',
+  },
+  timerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  actionButton: {
+    marginTop: 15,
     backgroundColor: '#0077be',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  completeButton: {
+    marginTop: 15,
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  completeButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    marginTop: 15,
+    backgroundColor: '#f44336',
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
@@ -246,7 +410,6 @@ subtopicContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.25)',
   },
   addButtonText: {
     fontSize: 20,
