@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { BlurView } from 'expo-blur';
+
+const { width } = Dimensions.get('window');
 
 // Mock data structure
 const mockData = {
@@ -76,8 +79,24 @@ const AddTaskPage = () => {
     setShowNewSubtopicInput(false);
   };
 
-  const removeTask = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const handleDeleteTask = (taskId) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this task?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: () => {
+            setTasks(tasks.filter(task => task.id !== taskId));
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   const toggleTaskCompletion = (taskId) => {
@@ -95,15 +114,9 @@ const AddTaskPage = () => {
     setIsSaving(true);
     
     try {
-      // This is where you'll connect to your backend
-      // For now, we'll simulate an API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Replace this with your actual API call:
-      // const response = await axios.post('YOUR_BACKEND_ENDPOINT', { tasks });
-      
       Alert.alert('Success', 'Your tasks have been saved successfully!');
-      setTasks([]); // Clear tasks after successful save
+      setTasks([]);
     } catch (error) {
       Alert.alert('Error', 'Failed to save tasks. Please try again.');
       console.error('Save error:', error);
@@ -114,23 +127,36 @@ const AddTaskPage = () => {
 
   return (
     <LinearGradient
-    colors={['#0077be', '#00a8e8']} 
+      colors={['#e6f7ff', '#b3e0ff', '#80c9ff']}
       style={styles.gradientContainer}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerText}>Study Planner</Text>
           <Text style={styles.subHeaderText}>Organize your learning journey</Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Add New Study Task</Text>
+        {/* Add Task Card */}
+        <BlurView intensity={90} tint="light" style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="add-task" size={24} color="#fff" />
+            </View>
+            <Text style={styles.sectionTitle}>Add New Task</Text>
+          </View>
 
           {/* Subject Dropdown */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Subject</Text>
+            <View style={styles.labelContainer}>
+              <Icon name="menu-book" size={20} color="#2da9e9" />
+              <Text style={styles.label}>Subject</Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={currentTask.subject}
@@ -144,7 +170,7 @@ const AddTaskPage = () => {
                   setShowNewSubtopicInput(false);
                 }}
                 style={styles.picker}
-                dropdownIconColor="#0077be"
+                dropdownIconColor="#2da9e9"
               >
                 <Picker.Item label="Select Subject" value="" />
                 {subjects.map((sub, index) => (
@@ -156,7 +182,10 @@ const AddTaskPage = () => {
 
           {/* Chapter Dropdown */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Chapter</Text>
+            <View style={styles.labelContainer}>
+              <Icon name="library-books" size={20} color="#2da9e9" />
+              <Text style={styles.label}>Chapter</Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={currentTask.chapter}
@@ -170,7 +199,7 @@ const AddTaskPage = () => {
                 }}
                 style={styles.picker}
                 enabled={!!currentTask.subject}
-                dropdownIconColor="#0077be"
+                dropdownIconColor="#2da9e9"
               >
                 <Picker.Item label="Select Chapter" value="" />
                 {chapters.map((chap, index) => (
@@ -182,7 +211,10 @@ const AddTaskPage = () => {
 
           {/* Subtopic Dropdown */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Subtopic</Text>
+            <View style={styles.labelContainer}>
+              <Icon name="topic" size={20} color="#2da9e9" />
+              <Text style={styles.label}>Subtopic</Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={currentTask.subtopic}
@@ -203,7 +235,7 @@ const AddTaskPage = () => {
                 }}
                 style={styles.picker}
                 enabled={!!currentTask.chapter}
-                dropdownIconColor="#0077be"
+                dropdownIconColor="#2da9e9"
               >
                 <Picker.Item label="Select Subtopic" value="" />
                 {subtopics.map((sub, index) => (
@@ -217,7 +249,10 @@ const AddTaskPage = () => {
           {/* Add New Subtopic Input */}
           {showNewSubtopicInput && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>New Subtopic</Text>
+              <View style={styles.labelContainer}>
+                <Icon name="create" size={20} color="#2da9e9" />
+                <Text style={styles.label}>New Subtopic</Text>
+              </View>
               <TextInput
                 style={styles.input}
                 placeholder="Enter new subtopic"
@@ -230,7 +265,10 @@ const AddTaskPage = () => {
 
           {/* Hours Input */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Study Hours</Text>
+            <View style={styles.labelContainer}>
+              <Icon name="access-time" size={20} color="#2da9e9" />
+              <Text style={styles.label}>Study Hours</Text>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="Estimated hours needed"
@@ -242,21 +280,31 @@ const AddTaskPage = () => {
           </View>
 
           {/* Add Task Button */}
-          <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
+          <TouchableOpacity 
+            style={styles.addButton} 
+            onPress={handleAddTask}
+            activeOpacity={0.7}
+          >
             <Icon name="add" size={24} color="#fff" />
             <Text style={styles.addButtonText}>Add Task</Text>
           </TouchableOpacity>
-        </View>
+        </BlurView>
 
         {/* Task List */}
-        {tasks.length > 0 && (
-          <View style={styles.taskListContainer}>
+        {tasks.length > 0 ? (
+          <BlurView intensity={90} tint="light" style={styles.taskListContainer}>
             <View style={styles.taskListHeader}>
-              <Text style={styles.sectionTitle}>Your Study Tasks ({tasks.length})</Text>
+              <View style={styles.taskListTitle}>
+                <View style={[styles.iconCircle, { backgroundColor: '#4CAF50' }]}>
+                  <Icon name="list-alt" size={20} color="#fff" />
+                </View>
+                <Text style={styles.sectionTitle}>Your Tasks ({tasks.length})</Text>
+              </View>
               <TouchableOpacity 
                 style={styles.saveButton} 
                 onPress={handleSaveTasks}
                 disabled={isSaving}
+                activeOpacity={0.7}
               >
                 {isSaving ? (
                   <ActivityIndicator color="#fff" />
@@ -278,34 +326,52 @@ const AddTaskPage = () => {
                   <TouchableOpacity 
                     style={styles.checkbox} 
                     onPress={() => toggleTaskCompletion(item.id)}
+                    activeOpacity={0.7}
                   >
                     <Icon 
-                      name={item.completed ? "check-box" : "check-box-outline-blank"} 
+                      name={item.completed ? "check-circle" : "radio-button-unchecked"} 
                       size={24} 
-                      color={item.completed ? "#4CAF50" : "#0077be"} 
+                      color={item.completed ? "#4CAF50" : "#2da9e9"} 
                     />
                   </TouchableOpacity>
                   <View style={styles.taskDetails}>
-                    <Text style={styles.taskSubject}>{item.subject}</Text>
+                    <View style={styles.taskSubjectRow}>
+                      <Text style={styles.taskSubject}>{item.subject}</Text>
+                      <View style={styles.timeBadge}>
+                        <Icon name="access-time" size={14} color="#fff" />
+                        <Text style={styles.taskHours}>{item.hours}h</Text>
+                      </View>
+                    </View>
                     <Text style={styles.taskChapter}>{item.chapter}</Text>
                     <Text style={styles.taskSubtopic}>{item.subtopic}</Text>
-                    <Text style={styles.taskHours}>{item.hours} hours</Text>
                   </View>
                   <TouchableOpacity 
                     style={styles.deleteButton} 
-                    onPress={() => removeTask(item.id)}
+                    onPress={() => handleDeleteTask(item.id)}
+                    activeOpacity={0.7}
                   >
-                    <Icon name="delete" size={24} color="#f44336" />
+                    <Icon name="delete-outline" size={24} color="#f44336" />
                   </TouchableOpacity>
                 </View>
               )}
             />
-          </View>
+          </BlurView>
+        ) : (
+          <BlurView intensity={90} tint="light" style={styles.emptyState}>
+            <View style={[styles.iconCircle, { backgroundColor: 'rgba(45, 169, 233, 0.2)', borderWidth: 0 }]}>
+              <Icon name="assignment" size={40} color="#2da9e9" />
+            </View>
+            <Text style={styles.emptyStateText}>No tasks added yet</Text>
+            <Text style={styles.emptyStateSubtext}>Add your first task above</Text>
+          </BlurView>
         )}
       </ScrollView>
     </LinearGradient>
   );
 };
+
+// ... (keep the same styles as before)
+
 
 const styles = StyleSheet.create({
   gradientContainer: {
@@ -316,155 +382,239 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
+    paddingBottom: 40,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 30,
     alignItems: 'center',
   },
   headerText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '700',
-    color: '#fff',
+    color: '#2da9e9',
     fontFamily: 'sans-serif-medium',
-    marginBottom: 5,
+    marginBottom: 8,
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
   },
   subHeaderText: {
     fontSize: 16,
-    color: '#e3f2fd',
+    color: '#555',
     fontFamily: 'sans-serif',
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    elevation: 5, // Note: elevation is Android-only, you might want to keep it if supporting Android
+    borderRadius: 25,
+    padding: 25,
+    marginBottom: 25,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#2da9e9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '600',
-    color: '#0077be',
+    color: '#2da9e9',
     fontFamily: 'sans-serif-medium',
   },
   inputGroup: {
-    marginBottom: 15,
+    marginBottom: 22,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#0077be',
-    marginBottom: 8,
-    fontFamily: 'sans-serif',
+    color: '#555',
+    marginLeft: 10,
+    fontFamily: 'sans-serif-medium',
   },
   pickerContainer: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#bbdefb',
-    borderRadius: 10,
-    backgroundColor: '#e3f2fd',
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     overflow: 'hidden',
   },
   picker: {
     width: '100%',
     height: 50,
-    color: '#0077be',
+    color: '#2da9e9',
+    fontFamily: 'sans-serif',
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#bbdefb',
-    borderRadius: 10,
-    padding: 15,
-    backgroundColor: '#e3f2fd',
-    color: '#0077be',
+    borderRadius: 15,
+    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    color: '#2da9e9',
     fontSize: 16,
+    fontFamily: 'sans-serif',
   },
   addButton: {
     flexDirection: 'row',
-    backgroundColor: '#0077be',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#2da9e9',
+    padding: 18,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    boxShadow: '0 2px 4px rgba(0, 119, 190, 0.3)', // Replaces shadow props
-    elevation: 3, // (Keep if needed for Android)
+    shadowColor: '#2da9e9',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    marginLeft: 10,
+    marginLeft: 12,
+    fontFamily: 'sans-serif-medium',
   },
   taskListContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 15,
-    padding: 20,
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Replaces shadow props
-    // elevation: 5, // (Android-only, remove for web)
+    borderRadius: 25,
+    padding: 25,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   taskListHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
+  },
+  taskListTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   saveButton: {
     flexDirection: 'row',
     backgroundColor: '#4CAF50',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 10,
+    fontFamily: 'sans-serif-medium',
   },
   taskItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e3f2fd',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    borderLeftWidth: 5,
-    borderLeftColor: '#0077be',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   completedTask: {
     opacity: 0.7,
-    borderLeftColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
   },
   checkbox: {
-    marginRight: 15,
+    marginRight: 16,
   },
   taskDetails: {
     flex: 1,
   },
+  taskSubjectRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   taskSubject: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
-    color: '#0077be',
-    marginBottom: 3,
+    color: '#2da9e9',
+    fontFamily: 'sans-serif-medium',
   },
-  taskChapter: {
-    fontSize: 14,
-    color: '#2196F3',
-    marginBottom: 2,
-  },
-  taskSubtopic: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 3,
+  timeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2da9e9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   taskHours: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#0077be',
+    fontWeight: '600',
+    color: '#fff',
+    marginLeft: 5,
+    fontFamily: 'sans-serif-medium',
+  },
+  taskChapter: {
+    fontSize: 15,
+    color: '#555',
+    marginBottom: 3,
+    fontFamily: 'sans-serif',
+  },
+  taskSubtopic: {
+    fontSize: 14,
+    color: '#777',
+    fontFamily: 'sans-serif',
   },
   deleteButton: {
     marginLeft: 10,
+    padding: 8,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  emptyStateText: {
+    fontSize: 20,
+    color: '#555',
+    marginTop: 20,
+    fontWeight: '500',
+    fontFamily: 'sans-serif-medium',
+  },
+  emptyStateSubtext: {
+    fontSize: 15,
+    color: '#777',
+    marginTop: 8,
+    fontFamily: 'sans-serif',
   },
 });
 

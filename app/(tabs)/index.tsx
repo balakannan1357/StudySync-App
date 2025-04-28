@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, Dimensions } from 'react-native';
 import CalendarStrip from 'react-native-calendar-strip';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface Subtopic {
   subtopic_id: string;
@@ -141,7 +142,7 @@ const MainPage: React.FC = () => {
 
   return (
     <LinearGradient
-      colors={['#0077be', '#00a8e8']}
+      colors={['#68c7ff', '#4ab8f5', '#2da9e9']} // Sea blue gradient
       style={styles.gradientContainer}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
@@ -152,64 +153,93 @@ const MainPage: React.FC = () => {
           selectedDate={new Date(selectedDate)}
           onDateSelected={handleDateSelected}
           style={styles.calendar}
-          calendarColor={'rgba(255, 255, 255, 0.9)'}
-          calendarHeaderStyle={{ color: '#333' }}
+          calendarColor={'rgba(255, 255, 255, 0.8)'}
+          calendarHeaderStyle={{ color: '#333', fontSize: 16, fontWeight: 'bold' }}
           dateNumberStyle={{ color: '#333' }}
           dateNameStyle={{ color: '#333' }}
-          highlightDateNumberStyle={{ color: '#02B5EB' }}
-          highlightDateNameStyle={{ color: '#02B5EB' }}
-          disabledDateNameStyle={{ color: '#ccc' }}
-          disabledDateNumberStyle={{ color: '#ccc' }}
+          highlightDateNumberStyle={{ color: '#2da9e9', fontWeight: 'bold' }}
+          highlightDateNameStyle={{ color: '#2da9e9', fontWeight: 'bold' }}
+          disabledDateNameStyle={{ color: '#aaa' }}
+          disabledDateNumberStyle={{ color: '#aaa' }}
           iconContainer={{ flex: 0.1 }}
+          iconStyle={{ tintColor: '#2da9e9' }}
+          daySelectionAnimation={{ type: 'border', duration: 200, borderWidth: 2, borderHighlightColor: '#2da9e9' }}
         />
       </View>
 
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Today's Tasks</Text>
+        <Text style={styles.headerDate}>
+          {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+        </Text>
+      </View>
+
       {/* Subtopic List */}
-      <ScrollView style={styles.contentContainer}>
+      <ScrollView style={styles.contentContainer} contentContainerStyle={styles.scrollContent}>
         {filteredSubtopics.length > 0 ? (
           filteredSubtopics.map((subtopic) => (
             <TouchableOpacity
               key={subtopic.subtopic_id}
               onPress={() => handleSubtopicClick(subtopic)}
+              activeOpacity={0.8}
             >
               <SubtopicCard subtopic={subtopic} />
             </TouchableOpacity>
           ))
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No tasks for this day</Text>
+            <MaterialIcons name="beach-access" size={60} color="rgba(255, 255, 255, 0.7)" />
+            <Text style={styles.emptyStateText}>No tasks for today!</Text>
+            <Text style={styles.emptyStateSubtext}>Enjoy your free time</Text>
           </View>
         )}
       </ScrollView>
 
       {/* Floating Button to Add Subtopic */}
       <Link href="/addTaskPage" asChild>
-        <TouchableOpacity style={styles.addButton}>
-          <Text style={styles.addButtonText}>+</Text>
+        <TouchableOpacity style={styles.addButton} activeOpacity={0.8}>
+          <MaterialIcons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       </Link>
 
       {/* Action Modal (Start Now or Postpone) */}
       <Modal
         visible={showActionModal}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalBackdrop}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{selectedSubtopic?.subtopic_name}</Text>
+            <Text style={styles.modalSubtitle}>{selectedSubtopic?.subject}</Text>
+            <View style={styles.modalDivider} />
             <Text style={styles.modalText}>What would you like to do?</Text>
             
-            <TouchableOpacity style={styles.actionButton} onPress={startTimer}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.startNowButton]} 
+              onPress={startTimer}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="play-arrow" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Start Now</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.actionButton} onPress={postponeTask}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.postponeButton]} 
+              onPress={postponeTask}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="schedule" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>AD Hoc</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={closeModal}
+              activeOpacity={0.7}
+            >
               <Text style={styles.closeButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -219,33 +249,52 @@ const MainPage: React.FC = () => {
       {/* Timer Modal */}
       <Modal
         visible={modalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={closeModal}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalBackdrop}>
           <View style={styles.modalContent}>
             {selectedSubtopic && (
               <>
                 <Text style={styles.modalTitle}>{selectedSubtopic.subtopic_name}</Text>
-                <Text style={styles.modalText}>Subject: {selectedSubtopic.subject}</Text>
-                <Text style={styles.modalText}>Planned Time: {selectedSubtopic.starttime} - {selectedSubtopic.endtime}</Text>
+                <Text style={styles.modalSubtitle}>{selectedSubtopic.subject}</Text>
+                <View style={styles.modalDivider} />
                 
+                <View style={styles.timeInfoContainer}>
+                  <View style={styles.timeInfo}>
+                    <MaterialIcons name="access-time" size={20} color="#555" />
+                    <Text style={styles.modalText}>
+                      Planned: {selectedSubtopic.starttime} - {selectedSubtopic.endtime}
+                    </Text>
+                  </View>
+                </View>
+
                 {timerRunning && (
                   <View style={styles.timerContainer}>
-                    <Text style={styles.timerText}>Time Spent: {formatTime(timeSpent)}</Text>
+                    <Text style={styles.timerLabel}>Time Spent:</Text>
+                    <Text style={styles.timerText}>{formatTime(timeSpent)}</Text>
                   </View>
                 )}
               </>
             )}
             
             {timerRunning ? (
-              <TouchableOpacity style={styles.completeButton} onPress={completeTask}>
+              <TouchableOpacity 
+                style={styles.completeButton} 
+                onPress={completeTask}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons name="check-circle" size={24} color="#fff" />
                 <Text style={styles.completeButtonText}>Mark as Completed</Text>
               </TouchableOpacity>
             ) : null}
             
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={closeModal}
+              activeOpacity={0.7}
+            >
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -261,18 +310,24 @@ interface SubtopicCardProps {
 
 const SubtopicCard: React.FC<SubtopicCardProps> = ({ subtopic }) => (
   <View style={styles.subtopicContainer}>
-    <Text style={styles.subtopicName}>{subtopic.subtopic_name}</Text>
+    <View style={styles.subtopicHeader}>
+      <Text style={styles.subtopicName}>{subtopic.subtopic_name}</Text>
+      {subtopic.completed && (
+        <View style={styles.completedBadge}>
+          <Text style={styles.completedText}>Done</Text>
+        </View>
+      )}
+    </View>
     <Text style={styles.subtopicSubject}>{subtopic.subject}</Text>
-    <Text style={styles.subtopicTime}>
-      {subtopic.starttime} - {subtopic.endtime}
-    </Text>
-    {subtopic.completed && (
-      <Text style={styles.completedText}>Completed</Text>
-    )}
+    <View style={styles.timeContainer}>
+      <MaterialIcons name="schedule" size={16} color="#2da9e9" />
+      <Text style={styles.subtopicTime}>
+        {subtopic.starttime} - {subtopic.endtime}
+      </Text>
+    </View>
   </View>
 );
 
-// Styles remain the same as in the previous example
 const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
@@ -281,43 +336,86 @@ const styles = StyleSheet.create({
   },
   calendarContainer: {
     paddingTop: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: 'hidden',
   },
   calendar: {
     height: 100,
+    paddingTop: 10,
     paddingBottom: 10,
+  },
+  header: {
+    paddingHorizontal: 25,
+    paddingTop: 15,
+    paddingBottom: 5,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  headerDate: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 4,
   },
   contentContainer: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 15,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   subtopicContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 15,
+    padding: 18,
     marginBottom: 15,
-    elevation: 3,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  subtopicHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
   },
   subtopicName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
   },
   subtopicSubject: {
     fontSize: 14,
-    color: '#555',
+    color: '#666',
+    marginBottom: 8,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 5,
   },
   subtopicTime: {
     fontSize: 14,
-    color: '#0077be',
-    marginTop: 5,
+    color: '#2da9e9',
+    marginLeft: 5,
     fontWeight: '500',
   },
+  completedBadge: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
   completedText: {
-    fontSize: 14,
-    color: '#4CAF50',
-    marginTop: 5,
+    fontSize: 12,
+    color: '#fff',
     fontWeight: 'bold',
   },
   emptyState: {
@@ -325,12 +423,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 50,
+    padding: 20,
   },
   emptyStateText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 18,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginTop: 15,
+    fontWeight: '500',
   },
-  modalContainer: {
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 5,
+  },
+  modalBackdrop: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -338,83 +444,122 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    width: '80%',
+    borderRadius: 20,
+    padding: 25,
+    width: '85%',
     elevation: 5,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0077be',
-    marginBottom: 12,
+    color: '#2da9e9',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 15,
   },
   modalText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#555',
-    marginBottom: 8,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  timeInfoContainer: {
+    marginBottom: 20,
+  },
+  timeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 5,
   },
   timerContainer: {
-    marginVertical: 15,
     alignItems: 'center',
+    marginVertical: 15,
+  },
+  timerLabel: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 5,
   },
   timerText: {
-    fontSize: 18,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#2da9e9',
   },
   actionButton: {
-    marginTop: 15,
-    backgroundColor: '#0077be',
-    borderRadius: 8,
-    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 12,
+    elevation: 2,
+  },
+  startNowButton: {
+    backgroundColor: '#4CAF50',
+  },
+  postponeButton: {
+    backgroundColor: '#FF9800',
   },
   actionButtonText: {
     fontSize: 16,
     color: '#fff',
     fontWeight: 'bold',
+    marginLeft: 10,
   },
   completeButton: {
-    marginTop: 15,
-    backgroundColor: '#4CAF50',
-    borderRadius: 8,
-    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#2da9e9',
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 15,
+    elevation: 2,
   },
   completeButtonText: {
     fontSize: 16,
     color: '#fff',
     fontWeight: 'bold',
+    marginLeft: 10,
   },
   closeButton: {
-    marginTop: 15,
-    backgroundColor: '#f44336',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 10,
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#666',
     fontWeight: 'bold',
   },
   addButton: {
     position: 'absolute',
     bottom: 30,
     right: 30,
-    backgroundColor: '#fff',
-    width: 40,
-    height: 40,
+    backgroundColor: '#2da9e9',
+    width: 60,
+    height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
-  },
-  addButtonText: {
-    fontSize: 20,
-    color: '#0077be',
-    fontWeight: 'bold',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });
 
