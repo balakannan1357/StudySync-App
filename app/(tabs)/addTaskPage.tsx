@@ -398,6 +398,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 10,
   },
+  
   subHeaderText: {
     fontSize: 16,
     color: '#555',
@@ -478,12 +479,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+    elevation: 8,
     shadowColor: '#2da9e9',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
   },
+  
   addButtonText: {
     color: '#fff',
     fontSize: 18,
@@ -516,10 +518,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    boxShadow: '0px 4px 6px rgba(76, 175, 80, 0.3)',
     elevation: 6,
   },
   saveButtonText: {
@@ -536,12 +535,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 18,
     marginBottom: 15,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 3,
   },
+  
   completedTask: {
     opacity: 0.7,
     backgroundColor: 'rgba(76, 175, 80, 0.1)',
