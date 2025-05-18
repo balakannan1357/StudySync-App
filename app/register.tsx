@@ -319,26 +319,24 @@ export default function RegisterScreen() {
               {behavioralQuestions[currentStep - 1].text}
             </Text>
 
-            {behavioralQuestions[currentStep - 1].options.map(
-              (option, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.optionButton,
-                    answers[behavioralQuestions[currentStep - 1].id] ===
-                      option && styles.selectedOption,
-                  ]}
-                  onPress={() =>
-                    handleAnswerSelect(
-                      behavioralQuestions[currentStep - 1].id,
-                      option
-                    )
-                  }
-                >
-                  <Text style={styles.optionText}>{option}</Text>
-                </TouchableOpacity>
-              )
-            )}
+            {behavioralQuestions[currentStep - 1].options.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.optionButton,
+                  answers[behavioralQuestions[currentStep - 1].id] === option &&
+                    styles.selectedOption,
+                ]}
+                onPress={() =>
+                  handleAnswerSelect(
+                    behavioralQuestions[currentStep - 1].id,
+                    option
+                  )
+                }
+              >
+                <Text style={styles.optionText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
 
             <View style={styles.navigationButtons}>
               {currentStep > 1 && (

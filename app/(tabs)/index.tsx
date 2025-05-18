@@ -63,9 +63,7 @@ const MainPage: React.FC = () => {
   );
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeSpent, setTimeSpent] = useState<number>(0);
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
-    null
-  );
+  const [timerInterval, setTimerInterval] = useState<number | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
 
   const filteredSubtopics = subtopics.filter(
@@ -182,12 +180,6 @@ const MainPage: React.FC = () => {
           disabledDateNumberStyle={{ color: "#aaa" }}
           iconContainer={{ flex: 0.1 }}
           iconStyle={{ tintColor: "#2da9e9" }}
-          daySelectionAnimation={{
-            type: "border",
-            duration: 200,
-            borderWidth: 2,
-            borderHighlightColor: "#2da9e9",
-          }}
         />
       </View>
 

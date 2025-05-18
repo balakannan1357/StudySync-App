@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   FlatList,
   ScrollView,
   StyleSheet,
@@ -16,10 +15,8 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const { width } = Dimensions.get("window");
-
 // Mock data structure
-const mockData = {
+const mockData: any = {
   Chemistry: {
     Chapter1: ["Atomic Structure", "Chemical Bonding"],
     Chapter2: ["Thermodynamics", "Chemical Equilibrium"],
@@ -35,8 +32,8 @@ const mockData = {
 };
 
 const AddTaskPage = () => {
-  const [tasks, setTasks] = useState([]);
-  const [currentTask, setCurrentTask] = useState({
+  const [tasks, setTasks] = useState<any>([]);
+  const [currentTask, setCurrentTask] = useState<any>({
     subject: "",
     chapter: "",
     subtopic: "",
@@ -95,7 +92,7 @@ const AddTaskPage = () => {
     setShowNewSubtopicInput(false);
   };
 
-  const handleDeleteTask = (taskId) => {
+  const handleDeleteTask = (taskId: string) => {
     Alert.alert(
       "Confirm Delete",
       "Are you sure you want to delete this task?",
@@ -107,7 +104,7 @@ const AddTaskPage = () => {
         {
           text: "Delete",
           onPress: () => {
-            setTasks(tasks.filter((task) => task.id !== taskId));
+            setTasks(tasks.filter((task: any) => task.id !== taskId));
           },
           style: "destructive",
         },
@@ -115,9 +112,9 @@ const AddTaskPage = () => {
     );
   };
 
-  const toggleTaskCompletion = (taskId) => {
+  const toggleTaskCompletion = (taskId: string) => {
     setTasks(
-      tasks.map((task) =>
+      tasks.map((task: any) =>
         task.id === taskId ? { ...task, completed: !task.completed } : task
       )
     );
@@ -193,8 +190,8 @@ const AddTaskPage = () => {
                 dropdownIconColor="#2da9e9"
               >
                 <Picker.Item label="Select Subject" value="" />
-                {subjects.map((sub, index) => (
-                  <Picker.Item key={index} label={sub} value={sub} />
+                {subjects.map((sub) => (
+                  <Picker.Item key={sub} label={sub} value={sub} />
                 ))}
               </Picker>
             </View>
@@ -222,8 +219,8 @@ const AddTaskPage = () => {
                 dropdownIconColor="#2da9e9"
               >
                 <Picker.Item label="Select Chapter" value="" />
-                {chapters.map((chap, index) => (
-                  <Picker.Item key={index} label={chap} value={chap} />
+                {chapters.map((chap) => (
+                  <Picker.Item key={chap} label={chap} value={chap} />
                 ))}
               </Picker>
             </View>
@@ -258,8 +255,8 @@ const AddTaskPage = () => {
                 dropdownIconColor="#2da9e9"
               >
                 <Picker.Item label="Select Subtopic" value="" />
-                {subtopics.map((sub, index) => (
-                  <Picker.Item key={index} label={sub} value={sub} />
+                {subtopics.map((sub: any) => (
+                  <Picker.Item key={sub} label={sub} value={sub} />
                 ))}
                 <Picker.Item label="+ Add New Subtopic" value="add_new" />
               </Picker>
