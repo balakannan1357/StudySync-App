@@ -1,10 +1,9 @@
-// app/(auth)/_layout.tsx
-import { Redirect, Slot } from 'expo-router';
-import { useAuth } from '../../context/AuthContext';
+import { Redirect, Slot } from "expo-router";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AuthLayout() {
   const { isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <Redirect href="/login" />;
   }

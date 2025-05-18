@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, Dimensions } from 'react-native';
-import CalendarStrip from 'react-native-calendar-strip';
-import { Link } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import CalendarStrip from "react-native-calendar-strip";
 
 interface Subtopic {
   subtopic_id: string;
@@ -17,42 +24,48 @@ interface Subtopic {
 
 const mockSubtopics: Subtopic[] = [
   {
-    subtopic_id: '1',
-    subtopic_name: 'Motion in a Straight Line',
-    subject: 'Physics',
-    starttime: '09:30',
-    endtime: '10:30',
-    date: '2025-04-28',
+    subtopic_id: "1",
+    subtopic_name: "Motion in a Straight Line",
+    subject: "Physics",
+    starttime: "09:30",
+    endtime: "10:30",
+    date: "2025-04-28",
     completed: false,
   },
   {
-    subtopic_id: '2',
-    subtopic_name: 'Newton\'s Laws of Motion',
-    subject: 'Physics',
-    starttime: '10:30',
-    endtime: '11:00',
-    date: '2025-04-28',
+    subtopic_id: "2",
+    subtopic_name: "Newton's Laws of Motion",
+    subject: "Physics",
+    starttime: "10:30",
+    endtime: "11:00",
+    date: "2025-04-28",
     completed: false,
   },
   {
-    subtopic_id: '3',
-    subtopic_name: 'Work, Energy, and Power',
-    subject: 'Physics',
-    starttime: '16:30',
-    endtime: '17:00',
-    date: '2025-04-29',
+    subtopic_id: "3",
+    subtopic_name: "Work, Energy, and Power",
+    subject: "Physics",
+    starttime: "16:30",
+    endtime: "17:00",
+    date: "2025-04-29",
     completed: false,
   },
 ];
 
 const MainPage: React.FC = () => {
   const [subtopics, setSubtopics] = useState<Subtopic[]>(mockSubtopics);
-  const [selectedSubtopic, setSelectedSubtopic] = useState<Subtopic | null>(null);
+  const [selectedSubtopic, setSelectedSubtopic] = useState<Subtopic | null>(
+    null
+  );
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeSpent, setTimeSpent] = useState<number>(0);
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(
+    null
+  );
   const [showActionModal, setShowActionModal] = useState(false);
 
   const filteredSubtopics = subtopics.filter(
@@ -72,14 +85,14 @@ const MainPage: React.FC = () => {
   };
 
   const handleDateSelected = (date: Date) => {
-    setSelectedDate(date.toISOString().split('T')[0]);
+    setSelectedDate(date.toISOString().split("T")[0]);
   };
 
   const startTimer = () => {
     setTimerRunning(true);
     setTimeSpent(0);
     const interval = setInterval(() => {
-      setTimeSpent(prev => prev + 1);
+      setTimeSpent((prev) => prev + 1);
     }, 1000);
     setTimerInterval(interval);
     setShowActionModal(false);
@@ -97,7 +110,7 @@ const MainPage: React.FC = () => {
   const completeTask = () => {
     stopTimer();
     if (selectedSubtopic) {
-      const updatedSubtopics = subtopics.map(subtopic => {
+      const updatedSubtopics = subtopics.map((subtopic) => {
         if (subtopic.subtopic_id === selectedSubtopic.subtopic_id) {
           return { ...subtopic, completed: true };
         }
@@ -112,15 +125,15 @@ const MainPage: React.FC = () => {
     if (selectedSubtopic) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowDate = tomorrow.toISOString().split('T')[0];
-      
-      const updatedSubtopics = subtopics.map(subtopic => {
+      const tomorrowDate = tomorrow.toISOString().split("T")[0];
+
+      const updatedSubtopics = subtopics.map((subtopic) => {
         if (subtopic.subtopic_id === selectedSubtopic.subtopic_id) {
           return { ...subtopic, date: tomorrowDate };
         }
         return subtopic;
       });
-      
+
       setSubtopics(updatedSubtopics);
     }
     closeModal();
@@ -129,7 +142,9 @@ const MainPage: React.FC = () => {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   useEffect(() => {
@@ -142,7 +157,7 @@ const MainPage: React.FC = () => {
 
   return (
     <LinearGradient
-      colors={['#68c7ff', '#4ab8f5', '#2da9e9']} // Sea blue gradient
+      colors={["#68c7ff", "#4ab8f5", "#2da9e9"]} // Sea blue gradient
       style={styles.gradientContainer}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
@@ -153,17 +168,26 @@ const MainPage: React.FC = () => {
           selectedDate={new Date(selectedDate)}
           onDateSelected={handleDateSelected}
           style={styles.calendar}
-          calendarColor={'rgba(255, 255, 255, 0.8)'}
-          calendarHeaderStyle={{ color: '#333', fontSize: 16, fontWeight: 'bold' }}
-          dateNumberStyle={{ color: '#333' }}
-          dateNameStyle={{ color: '#333' }}
-          highlightDateNumberStyle={{ color: '#2da9e9', fontWeight: 'bold' }}
-          highlightDateNameStyle={{ color: '#2da9e9', fontWeight: 'bold' }}
-          disabledDateNameStyle={{ color: '#aaa' }}
-          disabledDateNumberStyle={{ color: '#aaa' }}
+          calendarColor={"rgba(255, 255, 255, 0.8)"}
+          calendarHeaderStyle={{
+            color: "#333",
+            fontSize: 16,
+            fontWeight: "bold",
+          }}
+          dateNumberStyle={{ color: "#333" }}
+          dateNameStyle={{ color: "#333" }}
+          highlightDateNumberStyle={{ color: "#2da9e9", fontWeight: "bold" }}
+          highlightDateNameStyle={{ color: "#2da9e9", fontWeight: "bold" }}
+          disabledDateNameStyle={{ color: "#aaa" }}
+          disabledDateNumberStyle={{ color: "#aaa" }}
           iconContainer={{ flex: 0.1 }}
-          iconStyle={{ tintColor: '#2da9e9' }}
-          daySelectionAnimation={{ type: 'border', duration: 200, borderWidth: 2, borderHighlightColor: '#2da9e9' }}
+          iconStyle={{ tintColor: "#2da9e9" }}
+          daySelectionAnimation={{
+            type: "border",
+            duration: 200,
+            borderWidth: 2,
+            borderHighlightColor: "#2da9e9",
+          }}
         />
       </View>
 
@@ -171,12 +195,19 @@ const MainPage: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Today's Tasks</Text>
         <Text style={styles.headerDate}>
-          {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          {new Date(selectedDate).toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
         </Text>
       </View>
 
       {/* Subtopic List */}
-      <ScrollView style={styles.contentContainer} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.contentContainer}
+        contentContainerStyle={styles.scrollContent}
+      >
         {filteredSubtopics.length > 0 ? (
           filteredSubtopics.map((subtopic) => (
             <TouchableOpacity
@@ -189,7 +220,11 @@ const MainPage: React.FC = () => {
           ))
         ) : (
           <View style={styles.emptyState}>
-            <MaterialIcons name="beach-access" size={60} color="rgba(255, 255, 255, 0.7)" />
+            <MaterialIcons
+              name="beach-access"
+              size={60}
+              color="rgba(255, 255, 255, 0.7)"
+            />
             <Text style={styles.emptyStateText}>No tasks for today!</Text>
             <Text style={styles.emptyStateSubtext}>Enjoy your free time</Text>
           </View>
@@ -212,31 +247,35 @@ const MainPage: React.FC = () => {
       >
         <View style={styles.modalBackdrop}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedSubtopic?.subtopic_name}</Text>
-            <Text style={styles.modalSubtitle}>{selectedSubtopic?.subject}</Text>
+            <Text style={styles.modalTitle}>
+              {selectedSubtopic?.subtopic_name}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {selectedSubtopic?.subject}
+            </Text>
             <View style={styles.modalDivider} />
             <Text style={styles.modalText}>What would you like to do?</Text>
-            
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.startNowButton]} 
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.startNowButton]}
               onPress={startTimer}
               activeOpacity={0.7}
             >
               <MaterialIcons name="play-arrow" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Start Now</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.postponeButton]} 
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.postponeButton]}
               onPress={postponeTask}
               activeOpacity={0.7}
             >
               <MaterialIcons name="schedule" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>AD Hoc</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.closeButton} 
+
+            <TouchableOpacity
+              style={styles.closeButton}
               onPress={closeModal}
               activeOpacity={0.7}
             >
@@ -257,15 +296,20 @@ const MainPage: React.FC = () => {
           <View style={styles.modalContent}>
             {selectedSubtopic && (
               <>
-                <Text style={styles.modalTitle}>{selectedSubtopic.subtopic_name}</Text>
-                <Text style={styles.modalSubtitle}>{selectedSubtopic.subject}</Text>
+                <Text style={styles.modalTitle}>
+                  {selectedSubtopic.subtopic_name}
+                </Text>
+                <Text style={styles.modalSubtitle}>
+                  {selectedSubtopic.subject}
+                </Text>
                 <View style={styles.modalDivider} />
-                
+
                 <View style={styles.timeInfoContainer}>
                   <View style={styles.timeInfo}>
                     <MaterialIcons name="access-time" size={20} color="#555" />
                     <Text style={styles.modalText}>
-                      Planned: {selectedSubtopic.starttime} - {selectedSubtopic.endtime}
+                      Planned: {selectedSubtopic.starttime} -{" "}
+                      {selectedSubtopic.endtime}
                     </Text>
                   </View>
                 </View>
@@ -273,15 +317,17 @@ const MainPage: React.FC = () => {
                 {timerRunning && (
                   <View style={styles.timerContainer}>
                     <Text style={styles.timerLabel}>Time Spent:</Text>
-                    <Text style={styles.timerText}>{formatTime(timeSpent)}</Text>
+                    <Text style={styles.timerText}>
+                      {formatTime(timeSpent)}
+                    </Text>
                   </View>
                 )}
               </>
             )}
-            
+
             {timerRunning ? (
-              <TouchableOpacity 
-                style={styles.completeButton} 
+              <TouchableOpacity
+                style={styles.completeButton}
                 onPress={completeTask}
                 activeOpacity={0.7}
               >
@@ -289,9 +335,9 @@ const MainPage: React.FC = () => {
                 <Text style={styles.completeButtonText}>Mark as Completed</Text>
               </TouchableOpacity>
             ) : null}
-            
-            <TouchableOpacity 
-              style={styles.closeButton} 
+
+            <TouchableOpacity
+              style={styles.closeButton}
               onPress={closeModal}
               activeOpacity={0.7}
             >
@@ -331,15 +377,15 @@ const SubtopicCard: React.FC<SubtopicCardProps> = ({ subtopic }) => (
 const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   calendarContainer: {
     paddingTop: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   calendar: {
     height: 100,
@@ -353,12 +399,12 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: "#fff",
   },
   headerDate: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: "rgba(255, 255, 255, 0.8)",
     marginTop: 4,
   },
   contentContainer: {
@@ -369,156 +415,156 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   subtopicContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 15,
     padding: 18,
     marginBottom: 15,
     elevation: 2,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
   },
   subtopicHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 5,
   },
   subtopicName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     flex: 1,
   },
   subtopicSubject: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 8,
   },
   timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 5,
   },
   subtopicTime: {
     fontSize: 14,
-    color: '#2da9e9',
+    color: "#2da9e9",
     marginLeft: 5,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   completedBadge: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   completedText: {
     fontSize: 12,
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 50,
     padding: 20,
   },
   emptyStateText: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: "rgba(255, 255, 255, 0.9)",
     marginTop: 15,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: "rgba(255, 255, 255, 0.7)",
     marginTop: 5,
   },
   modalBackdrop: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 25,
-    width: '85%',
+    width: "85%",
     elevation: 5,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2da9e9',
+    fontWeight: "bold",
+    color: "#2da9e9",
     marginBottom: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalDivider: {
     height: 1,
-    backgroundColor: '#eee',
+    backgroundColor: "#eee",
     marginVertical: 15,
   },
   modalText: {
     fontSize: 15,
-    color: '#555',
+    color: "#555",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   timeInfoContainer: {
     marginBottom: 20,
   },
   timeInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 5,
   },
   timerContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 15,
   },
   timerLabel: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 5,
   },
   timerText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2da9e9',
+    fontWeight: "bold",
+    color: "#2da9e9",
   },
   actionButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 12,
     padding: 15,
     marginBottom: 12,
     elevation: 2,
   },
   startNowButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
   },
   postponeButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: "#FF9800",
   },
   actionButtonText: {
     fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     marginLeft: 10,
   },
   completeButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2da9e9',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#2da9e9",
     borderRadius: 12,
     padding: 15,
     marginTop: 15,
@@ -526,34 +572,34 @@ const styles = StyleSheet.create({
   },
   completeButtonText: {
     fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     marginLeft: 10,
   },
   closeButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderRadius: 12,
     padding: 15,
     marginTop: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#666',
-    fontWeight: 'bold',
+    color: "#666",
+    fontWeight: "bold",
   },
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: '#2da9e9',
+    backgroundColor: "#2da9e9",
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5,
-    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)',
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.3)",
   },
 });
 
