@@ -36,12 +36,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="calender"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="addTaskPage"
         options={{
           href: null,

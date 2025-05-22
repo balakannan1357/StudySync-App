@@ -1,7 +1,7 @@
 import { Picker } from "@react-native-picker/picker";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Mock data structure
 const mockData: any = {
@@ -42,6 +43,8 @@ const AddTaskPage = () => {
   });
   const [showNewSubtopicInput, setShowNewSubtopicInput] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
+  const { date, hour, minutes, from } = useLocalSearchParams();
 
   const subjects = Object.keys(mockData);
   const chapters = currentTask.subject
@@ -130,11 +133,21 @@ const AddTaskPage = () => {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      Alert.alert("Success", "Your tasks have been saved successfully!");
-      setTasks([]);
+
+      if (from === "index") {
+        router.replace({
+          pathname: "/",
+          params: {
+            newTasks: JSON.stringify(tasks),
+          },
+        });
+      } else {
+        Alert.alert("Success", "Your tasks have been saved!");
+        setTasks([]);
+      }
     } catch (error) {
+      console.error("Error saving tasks:", error);
       Alert.alert("Error", "Failed to save tasks. Please try again.");
-      console.error("Save error:", error);
     } finally {
       setIsSaving(false);
     }
