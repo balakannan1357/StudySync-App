@@ -1,11 +1,14 @@
-import { Picker } from "@react-native-picker/picker";
+import Select from "@/components/select";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +17,6 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Mock data structure
 const mockData: any = {
@@ -152,7 +154,6 @@ const AddTaskPage = () => {
       setIsSaving(false);
     }
   };
-
   return (
     <LinearGradient
       colors={["#e6f7ff", "#b3e0ff", "#80c9ff"]}
@@ -160,270 +161,273 @@ const AddTaskPage = () => {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 105 : 80}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Study Planner</Text>
-          <Text style={styles.subHeaderText}>
-            Organize your learning journey
-          </Text>
-        </View>
-
-        {/* Add Task Card */}
-        <BlurView intensity={90} tint="light" style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={styles.iconCircle}>
-              <Icon name="add-task" size={24} color="#fff" />
-            </View>
-            <Text style={styles.sectionTitle}>Add New Task</Text>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Study Planner</Text>
+            <Text style={styles.subHeaderText}>
+              Organize your learning journey
+            </Text>
           </View>
-
-          {/* Subject Dropdown */}
-          <View style={styles.inputGroup}>
-            <View style={styles.labelContainer}>
-              <Icon name="menu-book" size={20} color="#2da9e9" />
-              <Text style={styles.label}>Subject</Text>
+          {/* Add Task Card */}
+          <BlurView intensity={90} tint="light" style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.iconCircle}>
+                <Icon name="add-task" size={24} color="#fff" />
+              </View>
+              <Text style={styles.sectionTitle}>Add New Task</Text>
             </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={currentTask.subject}
-                onValueChange={(itemValue) => {
-                  setCurrentTask({
-                    ...currentTask,
-                    subject: itemValue,
-                    chapter: "",
-                    subtopic: "",
-                  });
-                  setShowNewSubtopicInput(false);
-                }}
-                style={styles.picker}
-                dropdownIconColor="#2da9e9"
-              >
-                <Picker.Item label="Select Subject" value="" />
-                {subjects.map((sub) => (
-                  <Picker.Item key={sub} label={sub} value={sub} />
-                ))}
-              </Picker>
-            </View>
-          </View>
-
-          {/* Chapter Dropdown */}
-          <View style={styles.inputGroup}>
-            <View style={styles.labelContainer}>
-              <Icon name="library-books" size={20} color="#2da9e9" />
-              <Text style={styles.label}>Chapter</Text>
-            </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={currentTask.chapter}
-                onValueChange={(itemValue) => {
-                  setCurrentTask({
-                    ...currentTask,
-                    chapter: itemValue,
-                    subtopic: "",
-                  });
-                  setShowNewSubtopicInput(false);
-                }}
-                style={styles.picker}
-                enabled={!!currentTask.subject}
-                dropdownIconColor="#2da9e9"
-              >
-                <Picker.Item label="Select Chapter" value="" />
-                {chapters.map((chap) => (
-                  <Picker.Item key={chap} label={chap} value={chap} />
-                ))}
-              </Picker>
-            </View>
-          </View>
-
-          {/* Subtopic Dropdown */}
-          <View style={styles.inputGroup}>
-            <View style={styles.labelContainer}>
-              <Icon name="topic" size={20} color="#2da9e9" />
-              <Text style={styles.label}>Subtopic</Text>
-            </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={currentTask.subtopic}
-                onValueChange={(itemValue) => {
-                  if (itemValue === "add_new") {
-                    setShowNewSubtopicInput(true);
-                    setCurrentTask({
-                      ...currentTask,
-                      subtopic: "",
-                    });
-                  } else {
-                    setCurrentTask({
-                      ...currentTask,
-                      subtopic: itemValue,
-                    });
-                    setShowNewSubtopicInput(false);
-                  }
-                }}
-                style={styles.picker}
-                enabled={!!currentTask.chapter}
-                dropdownIconColor="#2da9e9"
-              >
-                <Picker.Item label="Select Subtopic" value="" />
-                {subtopics.map((sub: any) => (
-                  <Picker.Item key={sub} label={sub} value={sub} />
-                ))}
-                <Picker.Item label="+ Add New Subtopic" value="add_new" />
-              </Picker>
-            </View>
-          </View>
-
-          {/* Add New Subtopic Input */}
-          {showNewSubtopicInput && (
+            {/* Subject Dropdown */}
             <View style={styles.inputGroup}>
               <View style={styles.labelContainer}>
-                <Icon name="create" size={20} color="#2da9e9" />
-                <Text style={styles.label}>New Subtopic</Text>
+                <Icon name="menu-book" size={20} color="#2da9e9" />
+                <Text style={styles.label}>Subject</Text>
+              </View>
+              <View style={styles.pickerContainer}>
+                <Select
+                  items={subjects.map((sub) => ({
+                    label: sub,
+                    value: sub,
+                  }))}
+                  onItemChange={(item) => {
+                    setCurrentTask({
+                      ...currentTask,
+                      subject: item.value,
+                      chapter: "",
+                      subtopic: "",
+                    });
+                    setShowNewSubtopicInput(false);
+                  }}
+                  hideLabel={true}
+                  placeholder="Select Subject"
+                />
+              </View>
+            </View>
+            {/* Chapter Dropdown */}
+            <View style={styles.inputGroup}>
+              <View style={styles.labelContainer}>
+                <Icon name="library-books" size={20} color="#2da9e9" />
+                <Text style={styles.label}>Chapter</Text>
+              </View>
+              <View style={styles.pickerContainer}>
+                <Select
+                  items={chapters.map((chap) => ({
+                    label: chap,
+                    value: chap,
+                  }))}
+                  onItemChange={(item) => {
+                    setCurrentTask({
+                      ...currentTask,
+                      chapter: item.value,
+                      subtopic: "",
+                    });
+                    setShowNewSubtopicInput(false);
+                  }}
+                  hideLabel={true}
+                  placeholder="Select Chapter"
+                ></Select>
+              </View>
+            </View>
+            {/* Subtopic Dropdown */}
+            <View style={styles.inputGroup}>
+              <View style={styles.labelContainer}>
+                <Icon name="topic" size={20} color="#2da9e9" />
+                <Text style={styles.label}>Subtopic</Text>
+              </View>
+              <View style={styles.pickerContainer}>
+                <Select
+                  items={subtopics.map((sub: any) => ({
+                    label: sub,
+                    value: sub,
+                  }))}
+                  onItemChange={(item) => {
+                    setCurrentTask({
+                      ...currentTask,
+                      subtopic: item.value,
+                    });
+                    setShowNewSubtopicInput(false);
+                  }}
+                  hideLabel={true}
+                  placeholder="Select Subtopic"
+                ></Select>
+              </View>
+            </View>
+
+            {/* Add New Subtopic Button */}
+            <TouchableOpacity
+              style={styles.addSubtopicButton}
+              onPress={() => setShowNewSubtopicInput(!showNewSubtopicInput)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.subtopicButtonWrapper}>
+                <Icon
+                  name={showNewSubtopicInput ? "remove" : "add"}
+                  size={16}
+                  color="#fff"
+                />
+                <Text style={styles.addSubTopicButtonText}>
+                  {showNewSubtopicInput ? "Cancel" : "Add New Subtopic"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Add New Subtopic Input */}
+            {showNewSubtopicInput && (
+              <View style={styles.inputGroup}>
+                <View style={styles.labelContainer}>
+                  <Icon name="create" size={20} color="#2da9e9" />
+                  <Text style={styles.label}>New Subtopic</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new subtopic"
+                  placeholderTextColor="#90caf9"
+                  value={currentTask.newSubtopic}
+                  onChangeText={(text) =>
+                    setCurrentTask({ ...currentTask, newSubtopic: text })
+                  }
+                />
+              </View>
+            )}
+            {/* Hours Input */}
+            <View style={styles.inputGroup}>
+              <View style={styles.labelContainer}>
+                <Icon name="access-time" size={20} color="#2da9e9" />
+                <Text style={styles.label}>Study Hours</Text>
               </View>
               <TextInput
                 style={styles.input}
-                placeholder="Enter new subtopic"
+                placeholder="Estimated hours needed"
                 placeholderTextColor="#90caf9"
-                value={currentTask.newSubtopic}
+                keyboardType="numeric"
+                value={currentTask.hours}
                 onChangeText={(text) =>
-                  setCurrentTask({ ...currentTask, newSubtopic: text })
+                  setCurrentTask({ ...currentTask, hours: text })
                 }
               />
             </View>
-          )}
-
-          {/* Hours Input */}
-          <View style={styles.inputGroup}>
-            <View style={styles.labelContainer}>
-              <Icon name="access-time" size={20} color="#2da9e9" />
-              <Text style={styles.label}>Study Hours</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="Estimated hours needed"
-              placeholderTextColor="#90caf9"
-              keyboardType="numeric"
-              value={currentTask.hours}
-              onChangeText={(text) =>
-                setCurrentTask({ ...currentTask, hours: text })
-              }
-            />
-          </View>
-
-          {/* Add Task Button */}
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={handleAddTask}
-            activeOpacity={0.7}
-          >
-            <Icon name="add" size={24} color="#fff" />
-            <Text style={styles.addButtonText}>Add Task</Text>
-          </TouchableOpacity>
-        </BlurView>
-
-        {/* Task List */}
-        {tasks.length > 0 ? (
-          <BlurView
-            intensity={90}
-            tint="light"
-            style={styles.taskListContainer}
-          >
-            <View style={styles.taskListHeader}>
-              <View style={styles.taskListTitle}>
-                <View
-                  style={[styles.iconCircle, { backgroundColor: "#4CAF50" }]}
-                >
-                  <Icon name="list-alt" size={20} color="#fff" />
-                </View>
-                <Text style={styles.sectionTitle}>
-                  Your Tasks ({tasks.length})
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveTasks}
-                disabled={isSaving}
-                activeOpacity={0.7}
-              >
-                {isSaving ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Icon name="save" size={20} color="#fff" />
-                    <Text style={styles.saveButtonText}>Save All</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-
-            <FlatList
-              data={tasks}
-              scrollEnabled={false}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View
-                  style={[
-                    styles.taskItem,
-                    item.completed && styles.completedTask,
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={styles.checkbox}
-                    onPress={() => toggleTaskCompletion(item.id)}
-                    activeOpacity={0.7}
-                  >
-                    <Icon
-                      name={
-                        item.completed
-                          ? "check-circle"
-                          : "radio-button-unchecked"
-                      }
-                      size={24}
-                      color={item.completed ? "#4CAF50" : "#2da9e9"}
-                    />
-                  </TouchableOpacity>
-                  <View style={styles.taskDetails}>
-                    <View style={styles.taskSubjectRow}>
-                      <Text style={styles.taskSubject}>{item.subject}</Text>
-                      <View style={styles.timeBadge}>
-                        <Icon name="access-time" size={14} color="#fff" />
-                        <Text style={styles.taskHours}>{item.hours}h</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.taskChapter}>{item.chapter}</Text>
-                    <Text style={styles.taskSubtopic}>{item.subtopic}</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDeleteTask(item.id)}
-                    activeOpacity={0.7}
-                  >
-                    <Icon name="delete-outline" size={24} color="#f44336" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-          </BlurView>
-        ) : (
-          <BlurView intensity={90} tint="light" style={styles.emptyState}>
-            <View
-              style={[
-                styles.iconCircle,
-                { backgroundColor: "rgba(45, 169, 233, 0.2)", borderWidth: 0 },
-              ]}
+            {/* Add Task Button */}
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddTask}
+              activeOpacity={0.7}
             >
-              <Icon name="assignment" size={40} color="#2da9e9" />
-            </View>
-            <Text style={styles.emptyStateText}>No tasks added yet</Text>
-            <Text style={styles.emptyStateSubtext}>
-              Add your first task above
-            </Text>
+              <Icon name="add" size={24} color="#fff" />
+              <Text style={styles.addButtonText}>Add Task</Text>
+            </TouchableOpacity>
           </BlurView>
-        )}
-      </ScrollView>
+          {/* Task List */}
+          {tasks.length > 0 ? (
+            <BlurView
+              intensity={90}
+              tint="light"
+              style={styles.taskListContainer}
+            >
+              <View style={styles.taskListHeader}>
+                <View style={styles.taskListTitle}>
+                  <View
+                    style={[styles.iconCircle, { backgroundColor: "#4CAF50" }]}
+                  >
+                    <Icon name="list-alt" size={20} color="#fff" />
+                  </View>
+                  <Text style={styles.sectionTitle}>
+                    Your Tasks ({tasks.length})
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSaveTasks}
+                  disabled={isSaving}
+                  activeOpacity={0.7}
+                >
+                  {isSaving ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <>
+                      <Icon name="save" size={20} color="#fff" />
+                      <Text style={styles.saveButtonText}>Save All</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={tasks}
+                scrollEnabled={false}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View
+                    style={[
+                      styles.taskItem,
+                      item.completed && styles.completedTask,
+                    ]}
+                  >
+                    <TouchableOpacity
+                      style={styles.checkbox}
+                      onPress={() => toggleTaskCompletion(item.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Icon
+                        name={
+                          item.completed
+                            ? "check-circle"
+                            : "radio-button-unchecked"
+                        }
+                        size={24}
+                        color={item.completed ? "#4CAF50" : "#2da9e9"}
+                      />
+                    </TouchableOpacity>
+                    <View style={styles.taskDetails}>
+                      <View style={styles.taskSubjectRow}>
+                        <Text style={styles.taskSubject}>{item.subject}</Text>
+                        <View style={styles.timeBadge}>
+                          <Icon name="access-time" size={14} color="#fff" />
+                          <Text style={styles.taskHours}>{item.hours}h</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.taskChapter}>{item.chapter}</Text>
+                      <Text style={styles.taskSubtopic}>{item.subtopic}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeleteTask(item.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Icon name="delete-outline" size={24} color="#f44336" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            </BlurView>
+          ) : (
+            <BlurView intensity={90} tint="light" style={styles.emptyState}>
+              <View
+                style={[
+                  styles.iconCircle,
+                  {
+                    backgroundColor: "rgba(45, 169, 233, 0.2)",
+                    borderWidth: 0,
+                  },
+                ]}
+              >
+                <Icon name="assignment" size={40} color="#2da9e9" />
+              </View>
+              <Text style={styles.emptyStateText}>No tasks added yet</Text>
+              <Text style={styles.emptyStateSubtext}>
+                Add your first task above
+              </Text>
+            </BlurView>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 };
@@ -542,12 +546,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-
   addButtonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
     marginLeft: 12,
+    fontFamily: "sans-serif-medium",
+  },
+  addSubtopicButton: {
+    alignSelf: "flex-end",
+    position: "relative",
+    top: -10,
+  },
+  subtopicButtonWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2da9e9",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  addSubTopicButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    marginLeft: 5,
     fontFamily: "sans-serif-medium",
   },
   taskListContainer: {
