@@ -1,12 +1,12 @@
+import { ITask } from "@/interfaces/weekPlan.interface";
+import { formatTime } from "@/utils/dateTime.util";
+import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { SubTopic } from "@/models/subTopic";
-import { formatTime } from "@/utils/time.util";
 
 interface Props {
   visible: boolean;
-  subtopic: SubTopic | null;
+  task: ITask | null;
   onClose: () => void;
   onComplete: () => void;
   timerRunning: boolean;
@@ -15,13 +15,13 @@ interface Props {
 
 const TimerModal = ({
   visible,
-  subtopic,
+  task,
   onClose,
   onComplete,
   timerRunning,
   timeSpent,
 }: Props) => {
-  if (!subtopic) return null;
+  if (!task) return null;
 
   return (
     <Modal
@@ -32,15 +32,17 @@ const TimerModal = ({
     >
       <View style={styles.backdrop}>
         <View style={styles.container}>
-          <Text style={styles.title}>{subtopic.subtopic_name}</Text>
-          <Text style={styles.subtitle}>{subtopic.subject}</Text>
+          <Text style={styles.title}>{task.subTopicId}</Text>
+          <Text style={styles.subtitle}>
+            {task.type} - {task.tags}
+          </Text>
           <View style={styles.divider} />
 
           <View style={styles.timeInfoContainer}>
             <View style={styles.timeInfo}>
               <MaterialIcons name="access-time" size={20} color="#555" />
               <Text style={styles.timeText}>
-                Planned: {subtopic.starttime} - {subtopic.endtime}
+                Planned: {task.duration} hours
               </Text>
             </View>
           </View>

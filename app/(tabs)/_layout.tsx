@@ -26,6 +26,7 @@ export default function TabLayout() {
         options={{
           title: "TaskApp",
           tabBarIcon: renderHomeTabBarIcon,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
