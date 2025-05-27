@@ -1,195 +1,269 @@
 import CalendarView from "@/components/calendarView";
 import TaskActionModal from "@/components/taskActionModal";
 import TimerModal from "@/components/timerModal";
+import { TaskStatus } from "@/enums/task.enum";
+import { WeekDay } from "@/enums/weekDay.enum";
 import { useTimer } from "@/hooks/useTimer";
-import { SubTopic } from "@/models/subTopic";
+import { ITask, IWeekPlan } from "@/interfaces/weekPlan.interface";
+import weekPlanService from "@/services/weekPlan.service";
+import { getWeekEndDate, getWeekStartDate } from "@/utils/dateTime.util";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Link, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 
-const mockSubtopics: SubTopic[] = [
-  {
-    subtopic_id: "1",
-    subtopic_name: "Motion in a Straight Line",
-    subject: "Physics",
-    starttime: "09:30",
-    endtime: "10:30",
-    date: "2025-05-22",
-    completed: false,
-  },
-];
+const dayIndexMap: { [key: string]: number } = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
 
 const IndexScreen = () => {
-  const [subtopics, setSubtopics] = useState<SubTopic[]>(mockSubtopics);
+  const [userId, setUserId] = useState<string>("");
+  const [weekPlan, setWeekPlan] = useState<IWeekPlan | null>(null);
+  const [events, setEvents] = useState<any>({});
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-  const [selectedSubtopic, setSelectedSubtopic] = useState<SubTopic | null>(
-    null
-  );
+  const [weekStartDate, setWeekStartDate] = useState<Date>(getWeekStartDate());
+  const [selectedTask, setSelectedTask] = useState<{
+    weekDay: WeekDay;
+    task: ITask;
+  } | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
   const [showTimerModal, setShowTimerModal] = useState(false);
   const [taskTimers, setTaskTimers] = useState<Record<string, number>>({});
   const [activeTimerStart, setActiveTimerStart] = useState<number | null>(null);
+
   const pendingConfirmation = useRef(false);
-  const router = useRouter();
-
   const { seconds, start, stop, reset } = useTimer();
+  const queryClient = useQueryClient();
+  const {
+    data,
+    isLoading: _,
+    isError,
+    error,
+  } = useQuery<IWeekPlan>({
+    queryKey: ["weekPlan", weekStartDate.toISOString()],
+    queryFn: () => fetchWeekPlan(weekStartDate.toISOString()),
+    enabled: !!userId,
+  });
 
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const userId = (await AsyncStorage.getItem("userId")) || "user-123";
+      setUserId(userId);
+    };
+
+    fetchUserId();
+  }, []);
+  useEffect(() => {
+    if (!weekPlan) return;
+
+    const events: any = {};
+    for (const [day, tasks] of Object.entries(weekPlan.tasks)) {
+      const dayIndex = dayIndexMap[day.toLowerCase()];
+      const date = new Date(weekPlan.weekStartDate);
+      date.setUTCDate(date.getUTCDate() + dayIndex);
+      const dateKey = date.toISOString().split("T")[0];
+
+      events[dateKey] = tasks.map((task) => ({
+        id: task.subTopicId,
+        start: task.startTime,
+        end: task.endTime,
+        title: `Task: ${task.subTopicId}`,
+        summary: `${task.type} - ${task.status} (${task.priority})`,
+        color: task.status === TaskStatus.COMPLETED ? "green" : "blue",
+      }));
+    }
+
+    setEvents(events);
+  }, [weekPlan]);
+  useEffect(() => {
+    if (isError) {
+      console.error("Error fetching week plan:", error);
+    }
+  }, [isError, error]);
   useEffect(() => {
     if (
       !showTimerModal &&
       activeTimerStart !== null &&
-      selectedSubtopic &&
+      selectedTask &&
       !pendingConfirmation.current
     ) {
       const duration = seconds;
       setTaskTimers((prev) => ({
         ...prev,
-        [selectedSubtopic.subtopic_id]:
-          (prev[selectedSubtopic.subtopic_id] || 0) + duration,
+        [selectedTask.task.subTopicId]:
+          (prev[selectedTask.task.subTopicId] || 0) + duration,
       }));
       reset();
       setActiveTimerStart(null);
     }
   }, [showTimerModal]);
 
-  const handleSubtopicClick = (subtopic: SubTopic) => {
-    setSelectedSubtopic(subtopic);
-    setShowActionModal(true);
+  const fetchWeekPlan = async (selectedDate: string) => {
+    if (!selectedDate) throw new Error("Selected Date is required");
+    const data = await weekPlanService.getByWeekStartDate(selectedDate);
+    setWeekPlan(data);
+    return data;
+  };
+  const updateWeekPlan = (weekPlan: IWeekPlan) => {
+    weekPlanService
+      .update(weekPlan._id, weekPlan)
+      .then((updatedData: IWeekPlan) => {
+        queryClient.setQueryData(
+          ["weekPlan", weekStartDate.toISOString()],
+          updatedData
+        );
+        setWeekPlan(updatedData);
+      })
+      .catch((err: any) => {
+        console.error("Failed to update task status:", err);
+      });
   };
 
-  const startTimer = () => {
-    if (selectedSubtopic) {
-      reset();
-      start();
-      setActiveTimerStart(Date.now());
-      setShowActionModal(false);
-      setShowTimerModal(true);
+  const getCurrentTimer = () => {
+    if (selectedTask) {
+      return taskTimers[selectedTask.task.subTopicId] || 0;
+    }
+    return 0;
+  };
+
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date);
+    const currentDateObj = new Date(date);
+    const selectedDateObj = new Date(selectedDate);
+
+    const weekStart = getWeekStartDate(currentDateObj);
+    const weekEnd = getWeekEndDate(currentDateObj);
+
+    if (selectedDateObj < weekStart || selectedDateObj > weekEnd) {
+      setWeekStartDate(weekStart);
+    }
+  };
+  const handleEventPress = (event: any) => {
+    if (!weekPlan || !event) return;
+
+    const dayIndex = new Date(event.start).getDay();
+    const weekDay = Object.values(WeekDay)[dayIndex];
+    const task = weekPlan.tasks[weekDay]?.find(
+      (t: ITask) => t.subTopicId === event.id
+    );
+
+    if (task) {
+      setSelectedTask({ weekDay, task });
+      setShowActionModal(true);
     }
   };
 
-  const completeTask = () => {
+  const onStart = () => {
+    if (!selectedTask) return;
+
+    setShowActionModal(false);
+    reset();
+    start();
+    setActiveTimerStart(Date.now());
+    setShowTimerModal(true);
+  };
+  const onPostpone = () => {
+    setShowActionModal(false);
+
+    if (!selectedTask || !weekPlan) return;
+
+    const nextDayIndex =
+      (Object.values(WeekDay).indexOf(selectedTask.weekDay) + 1) % 7;
+    const nextDay = Object.values(WeekDay)[nextDayIndex];
+
+    selectedTask.task.startTime = new Date(selectedTask.task.startTime);
+    selectedTask.task.endTime = new Date(selectedTask.task.endTime);
+
+    selectedTask.task.startTime.setDate(
+      selectedTask.task.startTime.getDate() + 1
+    );
+    selectedTask.task.endTime.setDate(selectedTask.task.endTime.getDate() + 1);
+
+    const updatedWeekPlan: IWeekPlan = {
+      ...weekPlan,
+      tasks: {
+        ...weekPlan.tasks,
+        [selectedTask.weekDay]: weekPlan.tasks[selectedTask.weekDay].filter(
+          (task) => task.subTopicId !== selectedTask.task.subTopicId
+        ),
+      },
+    };
+    updatedWeekPlan.tasks[nextDay].push(selectedTask.task);
+
+    updateWeekPlan(updatedWeekPlan);
+    setSelectedTask(null);
+  };
+
+  const onComplete = () => {
     stop();
     pendingConfirmation.current = true;
-    if (selectedSubtopic) {
+    if (selectedTask) {
       Alert.alert("Confirmation", "Did you complete this task?", [
         {
           text: "No",
-          onPress: () => {
-            pendingConfirmation.current = false;
-            setShowTimerModal(false);
-            setSelectedSubtopic(null);
-          },
+          onPress: handleTaskCompletionCancelled,
           style: "cancel",
         },
         {
           text: "Yes",
-          onPress: () => {
-            setTaskTimers((prev) => ({
-              ...prev,
-              [selectedSubtopic.subtopic_id]:
-                (prev[selectedSubtopic.subtopic_id] || 0) + seconds,
-            }));
-            const updated = subtopics.map((s) =>
-              s.subtopic_id === selectedSubtopic.subtopic_id
-                ? { ...s, completed: true }
-                : s
-            );
-            setSubtopics(updated);
-            pendingConfirmation.current = false;
-            setShowTimerModal(false);
-            setSelectedSubtopic(null);
-            reset();
-          },
+          onPress: handleTaskCompletionConfirmed,
         },
       ]);
     }
   };
-
-  const postponeTask = () => {
-    if (selectedSubtopic) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split("T")[0];
-      const updated = subtopics.map((s) =>
-        s.subtopic_id === selectedSubtopic.subtopic_id
-          ? { ...s, date: tomorrowStr }
-          : s
-      );
-      setSubtopics(updated);
-    }
-    setShowActionModal(false);
-    setSelectedSubtopic(null);
+  const handleTaskCompletionCancelled = () => {
+    pendingConfirmation.current = false;
+    setShowTimerModal(false);
+    setSelectedTask(null);
   };
+  const handleTaskCompletionConfirmed = () => {
+    if (!weekPlan || !selectedTask) return;
 
-  const handleCreateEvent = (timeString: string, timeObject: any) => {
-    // const hourString = `${(timeObject.hour + 1).toString().padStart(2, "0")}`;
-    // const minutesString = `${timeObject.minutes.toString().padStart(2, "0")}`;
+    setTaskTimers((prev) => ({
+      ...prev,
+      [selectedTask.task.subTopicId]:
+        (prev[selectedTask.task.subTopicId] || 0) + seconds,
+    }));
 
-    // const newTask: SubTopic = {
-    //   subtopic_id: Date.now().toString(),
-    //   subtopic_name: "New Event",
-    //   subject: "General",
-    //   starttime: timeObject.hour + ":" + timeObject.minutes,
-    //   endtime: hourString + ":" + minutesString,
-    //   date: timeObject.date,
-    //   completed: false,
-    // };
-    // setSubtopics((prev) => [...prev, newTask]);
-
-    const hour = timeObject.hour;
-    const minutes = timeObject.minutes;
-    const date = timeObject.date;
-
-    router.push({
-      pathname: "/addTaskPage",
-      params: {
-        date,
-        hour,
-        minutes,
-        from: "index", // optional flag
+    selectedTask.task.status = TaskStatus.COMPLETED;
+    const updatedWeekPlan: IWeekPlan = {
+      ...weekPlan,
+      tasks: {
+        ...weekPlan.tasks,
+        [selectedTask.weekDay]: weekPlan.tasks[selectedTask.weekDay].map(
+          (task) =>
+            task.subTopicId === selectedTask.task.subTopicId
+              ? selectedTask.task
+              : task
+        ),
       },
-    });
-  };
+    };
 
-  const handleEventPress = (event: any) => {
-    const task = subtopics[event.index];
-    if (task) {
-      setSelectedSubtopic(task);
-      reset();
-      start();
-      setActiveTimerStart(Date.now());
-      setShowTimerModal(true);
-    }
-  };
-
-  const getCurrentTimer = () => {
-    if (selectedSubtopic) {
-      return taskTimers[selectedSubtopic.subtopic_id] || 0;
-    }
-    return 0;
+    updateWeekPlan(updatedWeekPlan);
+    pendingConfirmation.current = false;
+    setShowTimerModal(false);
+    setSelectedTask(null);
+    reset();
   };
 
   return (
     <>
       <View style={[styles.calendarContainer, { flex: 1 }]}>
         <CalendarView
-          eventsByDate={subtopics.reduce((acc, s) => {
-            if (!acc[s.date]) acc[s.date] = [];
-            acc[s.date].push({
-              start: `${s.date} ${s.starttime}:00`,
-              end: `${s.date} ${s.endtime}:00`,
-              title: s.subtopic_name,
-              summary: s.subject,
-              color: s.completed ? "#4CAF50" : undefined,
-            });
-            return acc;
-          }, {} as Record<string, any[]>)}
+          eventsByDate={events}
           currentDate={selectedDate}
-          onCreateEvent={handleCreateEvent}
-          onApproveEvent={() => {}}
+          onDateChanged={handleDateChange}
+          onTimelineLongPress={() => {}}
           onEventPress={handleEventPress}
         />
       </View>
@@ -202,17 +276,17 @@ const IndexScreen = () => {
 
       <TaskActionModal
         visible={showActionModal}
-        subtopic={selectedSubtopic}
-        onStart={startTimer}
-        onPostpone={postponeTask}
+        task={selectedTask?.task || null}
+        onStart={onStart}
+        onPostpone={onPostpone}
         onClose={() => setShowActionModal(false)}
       />
 
       <TimerModal
         visible={showTimerModal}
-        subtopic={selectedSubtopic}
+        task={selectedTask?.task || null}
         onClose={() => setShowTimerModal(false)}
-        onComplete={completeTask}
+        onComplete={onComplete}
         timerRunning={true}
         timeSpent={seconds + getCurrentTimer()}
       />
@@ -234,7 +308,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: "#2da9e9",
+    backgroundColor: "#ff6347",
     width: 60,
     height: 60,
     borderRadius: 30,

@@ -1,17 +1,17 @@
-import { View, Text, StyleSheet } from "react-native";
+import { ISubTopic } from "@/interfaces/subTopic.interface";
 import { MaterialIcons } from "@expo/vector-icons";
-import { SubTopic } from "@/models/subTopic";
+import { StyleSheet, Text, View } from "react-native";
 
 interface Props {
-  subtopic: SubTopic;
+  subtopic: ISubTopic;
 }
 
 const SubTopicCard = ({ subtopic }: Props) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.name}>{subtopic.subtopic_name}</Text>
-        {subtopic.completed && (
+        <Text style={styles.name}>{subtopic.name}</Text>
+        {subtopic && (
           <View style={styles.completedBadge}>
             <Text style={styles.completedText}>Done</Text>
           </View>
@@ -20,9 +20,7 @@ const SubTopicCard = ({ subtopic }: Props) => {
       <Text style={styles.subject}>{subtopic.subject}</Text>
       <View style={styles.timeContainer}>
         <MaterialIcons name="schedule" size={16} color="#2da9e9" />
-        <Text style={styles.time}>
-          {subtopic.starttime} - {subtopic.endtime}
-        </Text>
+        <Text style={styles.time}>{subtopic.noOfHours}</Text>
       </View>
     </View>
   );

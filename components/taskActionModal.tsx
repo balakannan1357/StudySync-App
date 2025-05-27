@@ -1,10 +1,10 @@
-import { Modal, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { ITask } from "@/interfaces/weekPlan.interface";
 import { MaterialIcons } from "@expo/vector-icons";
-import { SubTopic } from "@/models/subTopic";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   visible: boolean;
-  subtopic: SubTopic | null;
+  task: ITask | null;
   onStart: () => void;
   onPostpone: () => void;
   onClose: () => void;
@@ -12,12 +12,12 @@ interface Props {
 
 const TaskActionModal = ({
   visible,
-  subtopic,
+  task,
   onStart,
   onPostpone,
   onClose,
 }: Props) => {
-  if (!subtopic) return null;
+  if (!task) return null;
 
   return (
     <Modal
@@ -28,8 +28,10 @@ const TaskActionModal = ({
     >
       <View style={styles.backdrop}>
         <View style={styles.container}>
-          <Text style={styles.title}>{subtopic.subtopic_name}</Text>
-          <Text style={styles.subtitle}>{subtopic.subject}</Text>
+          <Text style={styles.title}>{task.subTopicId}</Text>
+          <Text style={styles.subtitle}>
+            {task.type} - {task.tags}
+          </Text>
           <View style={styles.divider} />
           <Text style={styles.text}>What would you like to do?</Text>
 
