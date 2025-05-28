@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://studysync-api.onrender.com";
+export const API_BASE_URL = "https://studysync-api.netlify.app";
 
 export const ENDPOINTS = {
   auth: {
