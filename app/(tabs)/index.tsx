@@ -7,7 +7,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
-
+import NotifyButton from "@/components/notifyButton";
 const mockSubtopics: SubTopic[] = [
   {
     subtopic_id: "1",
@@ -216,6 +216,7 @@ const IndexScreen = () => {
         timerRunning={true}
         timeSpent={seconds + getCurrentTimer()}
       />
+      <NotifyButton/>
     </>
   );
 };
