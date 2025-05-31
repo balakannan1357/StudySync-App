@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const ProfileScreen = () => {
   const user = {
@@ -14,63 +14,38 @@ const ProfileScreen = () => {
 
   return (
     <LinearGradient
-      colors={["#0077be", "#00a8e8"]} // Sea blue gradient from darker to lighter
+      colors={["#0077be", "#00a8e8"]}
       style={styles.gradientContainer}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
     >
-      <View style={styles.overlay}>
-        {/* Profile Picture with Inner Border */}
-        <View style={styles.avatarBorder}>
-          <Image
-            source={require("../../assets/images/sriramPhoto.png")} // ✅ Local Image
-            style={styles.avatar}
-          />
-        </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          {/* Profile Picture with Inner Border */}
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarBorder}>
+              <Image
+                source={require("../../assets/images/sriramPhoto.png")}
+                style={styles.avatar}
+              />
+            </View>
+          </View>
 
-        {/* User Info */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>Name:</Text>
-          <View style={styles.valueBox}>
-            <Text style={styles.infoValue}>{user.name}</Text>
+          {/* User Info */}
+          <View style={styles.infoSection}>
+            {Object.entries(user).map(([key, value]) => (
+              <View style={styles.infoContainer} key={key}>
+                <Text style={styles.infoLabel}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}:
+                </Text>
+                <View style={styles.valueBox}>
+                  <Text style={styles.infoValue}>{value}</Text>
+                </View>
+              </View>
+            ))}
           </View>
         </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>DOB:</Text>
-          <View style={styles.valueBox}>
-            <Text style={styles.infoValue}>{user.dob}</Text>
-          </View>
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>Phone:</Text>
-          <View style={styles.valueBox}>
-            <Text style={styles.infoValue}>{user.phone}</Text>
-          </View>
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>Email:</Text>
-          <View style={styles.valueBox}>
-            <Text style={styles.infoValue}>{user.email}</Text>
-          </View>
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>Location:</Text>
-          <View style={styles.valueBox}>
-            <Text style={styles.infoValue}>{user.location}</Text>
-          </View>
-        </View>
-
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>School:</Text>
-          <View style={styles.valueBox}>
-            <Text style={styles.infoValue}>{user.school}</Text>
-          </View>
-        </View>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 };
@@ -79,51 +54,69 @@ const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
     width: "100%",
-    height: "100%",
   },
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent white overlay
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
+    paddingTop: 40,
+  },
+  container: {
+    flex: 1,
+  },
+  avatarContainer: {
     alignItems: "center",
+    marginBottom: 30,
   },
   avatarBorder: {
-    backgroundColor: "#ccc", // Gray background for the inner border
-    padding: 5, // Inner border thickness
-    borderRadius: 85, // Half of width/height to make it circular
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    padding: 8,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   avatar: {
     width: 150,
     height: 150,
     borderRadius: 75,
     borderWidth: 3,
-    borderColor: "#007AFF",
+    borderColor: "#fff",
+  },
+  infoSection: {
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 20, // Added some bottom margin
   },
   infoContainer: {
-    flexDirection: "row", // Align label and value horizontally
-    alignItems: "center", // Center vertically
-    marginTop: 15,
-    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
   },
   infoLabel: {
-    fontWeight: "bold",
+    fontWeight: "600",
     fontSize: 16,
-    color: "#555",
-    marginRight: 10, // Space between label and value box
+    color: "#0077be",
+    width: 90,
   },
   valueBox: {
-    backgroundColor: "#ccc", // Gray background for the value box
-    padding: 10,
-    borderRadius: 5,
-    flex: 1, // Take up remaining space
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "rgba(0, 119, 190, 0.1)",
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
   },
 });

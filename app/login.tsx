@@ -23,7 +23,8 @@ export default function LoginScreen() {
   const handleLogin = () => {
     if (username === "sriram2511" && password === "sriram@123") {
       login();
-      router.replace("/(tabs)");
+      // router.replace("/(tabs)");
+      router.replace("/behavioralQuestions" as `${string}/behavioralQuestions`);
     } else {
       alert("Invalid credentials. Please try again.");
     }
