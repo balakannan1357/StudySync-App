@@ -125,7 +125,8 @@ export default function RegisterScreen() {
   const handleSubmitRegistration = () => {
     console.log("User data:", userData);
     console.log("Behavioral answers:", answers);
-    router.replace("/login");
+    // router.replace("/login");
+    router.replace("/behaviouralQuestions");
   };
 
   return (
